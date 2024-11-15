@@ -1,9 +1,13 @@
 # Devlog Entry - 11/14/2024
 ## Introducing the Team
 Tools Lead: Alexander Halim
+
 Engine Lead: Liam Murray
+
 Tools and Engine Assistant: Sean Eric So
+
 Gameplay Design Lead: Carter Gruebel
+
 Aesthetic Design Lead: Jason Torres
 
 ## Tools and Materials
