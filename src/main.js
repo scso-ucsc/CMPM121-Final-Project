@@ -1,7 +1,7 @@
 "use strict";
 
 const WIDTH = 480;
-const HEIGHT = 500;
+const HEIGHT = 480;
 
 const SHARED_CONFIG = {
   width: WIDTH,
