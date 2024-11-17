@@ -1,6 +1,7 @@
 class PlayScene extends Phaser.Scene {
   constructor() {
     super("PlayScene");
+    this.day = 1;
   }
 
   create() {
@@ -9,10 +10,25 @@ class PlayScene extends Phaser.Scene {
 
     map.createLayer("Tile Layer 1", tileset1);
 
+    this.dayText = this.add
+      .text(
+        this.game.config.width / 2,
+        this.game.config.height / 10,
+        `Day: ${this.day}`,
+        {
+          fontSize: "24px",
+          color: "#ffffff",
+        }
+      )
+      .setOrigin(0.5, 0.5);
+
     this.player = this.physics.add.sprite(100, 100, "character");
     this.createPlayerAnimations();
 
     this.cursors = this.input.keyboard.createCursorKeys();
+    this.advanceKey = this.input.keyboard.addKey(
+      Phaser.Input.Keyboard.KeyCodes.SPACE
+    );
   }
 
   createPlayerAnimations() {
@@ -67,7 +83,16 @@ class PlayScene extends Phaser.Scene {
     });
   }
 
+  advanceDay() {
+    this.day++;
+    this.dayText.setText(`Day: ${this.day}`);
+  }
+
   update() {
+    if (Phaser.Input.Keyboard.JustDown(this.advanceKey)) {
+      this.advanceDay();
+    }
+
     this.player.setVelocity(0);
 
     if (this.cursors.left.isDown) {
