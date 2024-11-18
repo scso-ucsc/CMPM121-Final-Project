@@ -4,6 +4,7 @@ class PreloadScene extends Phaser.Scene {
   }
 
   preload() {
+    this.load.image("dirtTile", "assets/dirttile.png");
     this.load.tilemapTiledJSON("map", "assets/grassymap.json");
     this.load.image("tileset-1", "assets/grasstiles.png");
     this.load.spritesheet("character", "./assets/character.png", {
@@ -68,7 +69,8 @@ class PreloadScene extends Phaser.Scene {
     this.createPlayerAnimations();
 
     //Controls Text
-    document.getElementById("info").innerHTML = "<strong>CONTROLS:</strong> ARROWS - Move | X - Reap Cell | C - Sow Cell | SPACE - Advance Time"
+    document.getElementById("info").innerHTML =
+      "<strong>CONTROLS:</strong> ARROWS - Move | X - Reap Cell | C - Sow Cell | SPACE - Advance Time";
 
     //Start Game
     this.scene.start("PlayScene");

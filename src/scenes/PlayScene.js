@@ -22,6 +22,23 @@ class PlayScene extends Phaser.Scene {
       )
       .setOrigin(0.5, 0.5);
 
+    // setting up cells
+    this.cellGrid = [];
+    const growthWidth = 20;
+    const gridHeight = 20;
+    const cellSize = 32;
+
+    for (let row = 0; row < gridHeight; row++) {
+      this.cellGrid[row] = [];
+      for (let col = 0; col < growthWidth; col++) {
+        const x = col * cellSize + cellSize / 2;
+        const y = row * cellSize + cellSize / 2;
+
+        const cell = new Cell(this, x, y, "dirtTile");
+        this.cellGrid[row][col] = cell;
+      }
+    }
+
     //Binding Keys
     this.keys = this.input.keyboard.createCursorKeys();
     this.XKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.X);
