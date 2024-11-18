@@ -84,13 +84,12 @@ class MoveState extends State{
 class ReapState extends State{
     enter(scene, player){
         player.setVelocity(0);
-        console.log("REAP");
-        scene.playerTargetBox.x = player.x;
-        scene.playerTargetBox.y = player.y;
+        scene.playerReapTargetBox.x = player.x;
+        scene.playerReapTargetBox.y = player.y;
         
         scene.time.delayedCall(500, () => {
-            scene.playerTargetBox.x = -10;
-            scene.playerTargetBox.y = -10;
+            scene.playerReapTargetBox.x = -10;
+            scene.playerReapTargetBox.y = -10;
             this.stateMachine.transition("idle");
             return;
         })
@@ -100,13 +99,12 @@ class ReapState extends State{
 class SowState extends State{
     enter(scene, player){
         player.setVelocity(0);
-        console.log("SOW");
-        scene.playerTargetBox.x = player.x;
-        scene.playerTargetBox.y = player.y;
+        scene.playerSowTargetBox.x = player.x;
+        scene.playerSowTargetBox.y = player.y;
         
         scene.time.delayedCall(500, () => {
-            scene.playerTargetBox.x = -10;
-            scene.playerTargetBox.y = -10;
+            scene.playerSowTargetBox.x = -10;
+            scene.playerSowTargetBox.y = -10;
             this.stateMachine.transition("idle");
             return;
         })

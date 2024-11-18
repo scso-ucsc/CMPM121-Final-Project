@@ -17,14 +17,18 @@ class Cell extends Phaser.Physics.Arcade.Sprite{
 
     sowCell(plantType){
         if(this.planted == false){
+            console.log("Planted");
             this.type = plantType;
             this.planted = true;
         }
     }
 
     reapCell(){
-        this.type = "none";
-        this.planted = false;
+        if(this.planted == true){
+            console.log("Reaped");
+            this.type = "none";
+            this.planted = false;
+        }
     }
 
     checkCellGrowth(){
