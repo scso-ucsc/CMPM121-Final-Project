@@ -66,6 +66,11 @@ class PreloadScene extends Phaser.Scene {
 
   create() {
     this.createPlayerAnimations();
+
+    //Controls Text
+    document.getElementById("info").innerHTML = "<strong>CONTROLS:</strong> ARROWS - Move | X - Reap Cell | C - Sow Cell | SPACE - Advance Time"
+
+    //Start Game
     this.scene.start("PlayScene");
   }
 }
