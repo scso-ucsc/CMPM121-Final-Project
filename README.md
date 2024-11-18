@@ -22,7 +22,7 @@ Lastly, for our alternate platform choice, we plan on changing our primary langu
 ## Outlook
 By developing this project, we are looking to be able to expand our knowledge of the TypeScript language and learn more about how it compares with JavaScript. We are also aiming to focus on the portability of both the JavaScript and TypeScript languages, and potentially create a game that is accessible on all web platforms without requiring our players to download it first. As a result of this, the most difficult part about this project would be the transition from JavaScript to TypeScript, as the two language's difference in abilities can result in some problems occuring down the line. Therefore, we will be sure to research how we can effectively make the switch between languages before implementing it so that we are better prepared for this challenge.
 
-# Devlog Entry 0 - 11/14/2024
+# Devlog Entry 0 - 11/22/2024
 ## How we satisfied the software requirements
 F0.a: For the player movement, a Finite State Machine (FSM) was implemented onto the player prefab. This FSM features a Move state that is accessed whenever an arrow key is pressed, setting the player object's velocity in the desired direction. When moving either horizontally or vertically, the opposite's velocity will be set to 0, preventing the ability to walk diagonally.
 
