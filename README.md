@@ -40,7 +40,7 @@ F0.d: Whenever the advanceDay() function is pressed, a new water and sun level w
 
 F0.e: Each cell prefab on the grid, contains its own plant type and growth level value. These individual values are updated by interacting with the rest of the scene, with the plant type being determined by what seed the player sowed into it and the growth level being determined by the conditions of the grid. Players can select what type of plant they would like to currently sow, and can select from either grass, a flower, or a shrub by using the Q, W, and E keys respectively. This type is stored in a variables called playerSeedChoice from the play scene, and is passed as an argument whenever the player sows into a cell.
 
-F0.f:
+F0.f: To implement this requirement, whenever the advanceDay() function is called, each cell in the cell group will be checked to see if a plant has been planted into it. If this value returns true, then a subsequent check to see whether or not the current sun level and that cell's water level meets the required values. If met, the cell's growth level will increase by 1.
 
 F0.g:
 
