@@ -15,6 +15,7 @@ class PlayScene extends Phaser.Scene {
     this.bindKeys();
     this.createPlayer();
     this.createInteractions();
+    this.updateGrid();
   }
 
   update() {
@@ -37,6 +38,7 @@ class PlayScene extends Phaser.Scene {
     this.generateSunLevel();
     this.generateWaterLevel();
     this.updateUI();
+    this.updateGrid()
   }
 
   bindKeys(){
@@ -137,5 +139,15 @@ class PlayScene extends Phaser.Scene {
   updateSeedChoice(seedChoice){
     console.log("Now planting " + seedChoice);
     this.playerSeedChoice = seedChoice;
+  }
+
+  updateGrid(){
+    this.cellGroup.getChildren().forEach(cell => {
+      if(cell.checkIsPlanted()){
+        console.log(cell);
+        cell.checkCellGrowth();
+      }
+      cell.addWater(this.waterLevel);
+    })
   }
 }
