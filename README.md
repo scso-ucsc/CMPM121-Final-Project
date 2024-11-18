@@ -1,4 +1,4 @@
-# Devlog Entry - 11/14/2024
+# Devlog Entry Intro - 11/14/2024
 ## Introducing the Team
 Tools Lead: Alexander Halim
 
@@ -21,3 +21,21 @@ Lastly, for our alternate platform choice, we plan on changing our primary langu
 
 ## Outlook
 By developing this project, we are looking to be able to expand our knowledge of the TypeScript language and learn more about how it compares with JavaScript. We are also aiming to focus on the portability of both the JavaScript and TypeScript languages, and potentially create a game that is accessible on all web platforms without requiring our players to download it first. As a result of this, the most difficult part about this project would be the transition from JavaScript to TypeScript, as the two language's difference in abilities can result in some problems occuring down the line. Therefore, we will be sure to research how we can effectively make the switch between languages before implementing it so that we are better prepared for this challenge.
+
+# Devlog Entry 0 - 11/14/2024
+## How we satisfied the software requirements
+F0.a: For the player movement, a Finite State Machine (FSM) was implemented onto the player prefab. This FSM features a Move state that is accessed whenever an arrow key is pressed, setting the player object's velocity in the desired direction. When moving either horizontally or vertically, the opposite's velocity will be set to 0, preventing the ability to walk diagonally.
+
+F0.b:
+
+F0.c: In order to implement this requirement, we implemented two states in the Player FSM: Sow and Reap. The Sow state and Reap state are entered upon pressing the C and X keys, respectively. Upon doing so, the textureless sprites playerSowTargetBox and playerReapTargetBox will be moved onto the player's exact location, depending on which respective state was accessed. Our play scene will constantly check to see if any of these target boxes overlap with a cell on the grid, and upon doing so will trigger a function within the overlapped cell's prefab that will either sow a new plant into that cell or reap the current one. These functions will check to see if there are currently any plants in that cell to perform the required action. Furthermore, the target boxes are very small, making it difficult for an event in which multiple cells are interacted with can occur. This will enable the player to interact with the exact cell they are standing on.
+
+F0.d: Whenever the advanceDay() function is pressed, a new water and sun level will be generated and assigned to the waterLevel and sunLevel variables, respectively. These values are generated using the Math.random() function combined with the Math.floor() function to ensure that the generated value is an integer. They have also been set to have a max value with a minimum value of 0. Each cell on the grid will then have the newly generated waterLevel added to their respective waterLevel values, whereas the sunLevel value is left alone is only accessed by the cell at the beginning of each day.
+
+F0.e:
+
+F0.f:
+
+F0.g:
+
+## Reflection

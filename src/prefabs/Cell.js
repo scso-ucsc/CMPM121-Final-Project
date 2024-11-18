@@ -17,7 +17,7 @@ class Cell extends Phaser.Physics.Arcade.Sprite{
 
     sowCell(plantType){
         if(this.planted == false){
-            console.log("Planted");
+            console.log("Planting " + plantType);
             this.type = plantType;
             this.planted = true;
         }

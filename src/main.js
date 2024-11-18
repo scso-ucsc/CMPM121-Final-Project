@@ -31,5 +31,4 @@ let config = {
 
 let game = new Phaser.Game(config);
 
-let cursors;
 let { height, width } = game.config;
