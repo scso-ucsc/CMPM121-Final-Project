@@ -32,7 +32,7 @@ F0.c: In order to implement this requirement, we implemented two states in the P
 
 F0.d: Whenever the advanceDay() function is pressed, a new water and sun level will be generated and assigned to the waterLevel and sunLevel variables, respectively. These values are generated using the Math.random() function combined with the Math.floor() function to ensure that the generated value is an integer. They have also been set to have a max value with a minimum value of 0. Each cell on the grid will then have the newly generated waterLevel added to their respective waterLevel values, whereas the sunLevel value is left alone is only accessed by the cell at the beginning of each day.
 
-F0.e:
+F0.e: Each cell prefab on the grid, contains its own plant type and growth level value. These individual values are updated by interacting with the rest of the scene, with the plant type being determined by what seed the player sowed into it and the growth level being determined by the conditions of the grid. Players can select what type of plant they would like to currently sow, and can select from either grass, a flower, or a shrub by using the Q, W, and E keys respectively. This type is stored in a variables called playerSeedChoice from the play scene, and is passed as an argument whenever the player sows into a cell.
 
 F0.f:
 
