@@ -24,12 +24,15 @@ class PlayScene extends Phaser.Scene {
 
     //Binding Keys
     this.keys = this.input.keyboard.createCursorKeys();
+    this.XKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.X);
+    this.CKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.C);
     this.advanceKey = this.input.keyboard.addKey(
       Phaser.Input.Keyboard.KeyCodes.SPACE
     );
 
     //Creating Player
     this.player = new Player(this, 100, 100, "character", 0, "down");
+    this.playerTargetBox = this.physics.add.sprite(-10, -10).setSize(10, 10); //TargetBox starts off screen
   }
 
   advanceDay() {

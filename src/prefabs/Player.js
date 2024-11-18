@@ -14,7 +14,9 @@ class Player extends Phaser.Physics.Arcade.Sprite{
         //Initialising State Machine
         scene.playerFSM = new StateMachine("idle", {
             idle: new IdleState(),
-            move: new MoveState()
+            move: new MoveState(),
+            reap: new ReapState(),
+            sow: new SowState()
         }, [scene, this]);
     }
 }
@@ -27,6 +29,18 @@ class IdleState extends State{
 
     execute(scene, player){
         const {left, right, up, down} = scene.keys;
+        const XKey = scene.XKey;
+        const CKey = scene.CKey;
+
+        if(XKey.isDown){
+            this.stateMachine.transition("reap");
+            return;
+        }
+
+        if(CKey.isDown){
+            this.stateMachine.transition("sow");
+            return;
+        }
 
         if(left.isDown || right.isDown || up.isDown || down.isDown){
             this.stateMachine.transition("move");
@@ -38,6 +52,8 @@ class IdleState extends State{
 class MoveState extends State{
     execute(scene, player){
         const {left, right, up, down} = scene.keys;
+        const XKey = scene.XKey;
+        const CKey = scene.CKey;
         
         if(!(left.isDown || right.isDown || up.isDown || down.isDown)){
             this.stateMachine.transition("idle");
@@ -62,5 +78,37 @@ class MoveState extends State{
             player.direction = "down";
         }
         player.anims.play(`walk-${player.direction}`, true);
+    }
+}
+
+class ReapState extends State{
+    enter(scene, player){
+        player.setVelocity(0);
+        console.log("REAP");
+        scene.playerTargetBox.x = player.x;
+        scene.playerTargetBox.y = player.y;
+        
+        scene.time.delayedCall(500, () => {
+            scene.playerTargetBox.x = -10;
+            scene.playerTargetBox.y = -10;
+            this.stateMachine.transition("idle");
+            return;
+        })
+    }
+}
+
+class SowState extends State{
+    enter(scene, player){
+        player.setVelocity(0);
+        console.log("SOW");
+        scene.playerTargetBox.x = player.x;
+        scene.playerTargetBox.y = player.y;
+        
+        scene.time.delayedCall(500, () => {
+            scene.playerTargetBox.x = -10;
+            scene.playerTargetBox.y = -10;
+            this.stateMachine.transition("idle");
+            return;
+        })
     }
 }
