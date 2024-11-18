@@ -12,7 +12,60 @@ class PreloadScene extends Phaser.Scene {
     });
   }
 
+  createPlayerAnimations() {
+    this.anims.create({
+      key: "idle",
+      frames: this.anims.generateFrameNumbers("character", {
+        start: 0,
+        end: 3,
+      }),
+      frameRate: 4,
+      repeat: -1,
+    });
+
+    this.anims.create({
+      key: "walk-down",
+      frames: this.anims.generateFrameNumbers("character", {
+        start: 4,
+        end: 7,
+      }),
+      frameRate: 4,
+      repeat: -1,
+    });
+
+    this.anims.create({
+      key: "walk-up",
+      frames: this.anims.generateFrameNumbers("character", {
+        start: 8,
+        end: 11,
+      }),
+      frameRate: 4,
+      repeat: -1,
+    });
+
+    this.anims.create({
+      key: "walk-right",
+      frames: this.anims.generateFrameNumbers("character", {
+        start: 12,
+        end: 15,
+      }),
+      frameRate: 4,
+      repeat: -1,
+    });
+
+    this.anims.create({
+      key: "walk-left",
+      frames: this.anims.generateFrameNumbers("character", {
+        start: 16,
+        end: 19,
+      }),
+      frameRate: 4,
+      repeat: -1,
+    });
+  }
+
   create() {
+    this.createPlayerAnimations();
     this.scene.start("PlayScene");
   }
 }
