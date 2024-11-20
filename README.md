@@ -42,6 +42,6 @@ F0.e: Each cell prefab on the grid, contains its own plant type and growth level
 
 F0.f: To implement this requirement, whenever the advanceDay() function is called, each cell in the cell group will be checked to see if a plant has been planted into it. If this value returns true, then a subsequent check to see whether or not the current sun level and that cell's water level meets the required values. If met, the cell's growth level will increase by 1. Additionally, when the cells are iterated over, they will run a check that detects whether the surrounding plants permit for a plant to start growing at level 1. The requirements are that a cell can start growing a specific plant if they are surrounded by three or more of the same plant or the plant a tier below it (i.e. grass is tier 1, flower is tier 2).
 
-F0.g:
+F0.g: To implement this requirement, we added in game over condition for the player needing to have at least a total of 5 plants that had a growth level of 3. We added in the checkEndCondition() function that will check if the player has satisfied the end game requirements when the player advances to the next day. This function iterates through all planted cells, counting the number of plants that meet the required growth level. Once the end game conditions are met the gameOver() function will trigger and an alert on the page will pop up notifying the player that they have won. By implementing this feature, we successfully provide a clear and functional play scenario completion system as required.
 
 ## Reflection
