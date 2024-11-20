@@ -15,7 +15,7 @@ class PlayScene extends Phaser.Scene {
     this.bindKeys();
     this.createPlayer();
     this.createInteractions();
-    this.updateGrid();
+    this.updateGrid()
   }
 
   update() {
@@ -38,7 +38,8 @@ class PlayScene extends Phaser.Scene {
     this.generateSunLevel();
     this.generateWaterLevel();
     this.updateUI();
-    this.updateGrid()
+    this.updateGrid();
+    this.checkEndCondition()
   }
 
   bindKeys(){
@@ -92,17 +93,29 @@ class PlayScene extends Phaser.Scene {
       )
       .setOrigin(0.5, 0.5);
 
-    this.sunLevelText = this.add.text(this.game.config.width / 2, this.game.config.height / 10 * 1.5, `Sun Level: ${this.sunLevel}`,
-      {
-        fontSize: "18px",
-        color: "#ffffff",
-      }).setOrigin(0.5, 0.5);
-    
-      this.waterLevelText = this.add.text(this.game.config.width / 2, this.game.config.height / 10 * 2, `Water Level: ${this.waterLevel}`,
+    this.sunLevelText = this.add
+      .text(
+        this.game.config.width / 2,
+        (this.game.config.height / 10) * 1.5,
+        `Sun Level: ${this.sunLevel}`,
         {
           fontSize: "18px",
           color: "#ffffff",
-        }).setOrigin(0.5, 0.5);
+        }
+      )
+      .setOrigin(0.5, 0.5);
+
+    this.waterLevelText = this.add
+      .text(
+        this.game.config.width / 2,
+        (this.game.config.height / 10) * 2,
+        `Water Level: ${this.waterLevel}`,
+        {
+          fontSize: "18px",
+          color: "#ffffff",
+        }
+      )
+      .setOrigin(0.5, 0.5);
   }
 
   createPlayer(){
@@ -141,9 +154,9 @@ class PlayScene extends Phaser.Scene {
     this.playerSeedChoice = seedChoice;
   }
 
-  updateGrid(){
-    this.cellGroup.getChildren().forEach(cell => {
-      if(cell.checkIsPlanted()){
+  updateGrid() {
+    this.cellGroup.getChildren().forEach((cell) => {
+      if (cell.checkIsPlanted()) {
         console.log(cell);
         cell.checkCellGrowth();
         cell.checkNeighborCells();
@@ -151,4 +164,22 @@ class PlayScene extends Phaser.Scene {
       cell.addWater(this.waterLevel);
     })
   }
+
+  checkEndCondition() {
+    let maturePlantCount = 0;
+    this.cellGroup.getChildren().forEach((cell) => {
+      if (cell.growthLevel >= 3) {
+        maturePlantCount++;
+      }
+    });
+
+    if (maturePlantCount >= 5) {
+      this.gameOver();
+    }
+  }
+
+  gameOver() {
+    alert("End Condition Met: You Win!");
+  }
+  
 }
