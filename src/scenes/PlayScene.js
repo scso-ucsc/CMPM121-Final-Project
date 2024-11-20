@@ -146,6 +146,7 @@ class PlayScene extends Phaser.Scene {
       if(cell.checkIsPlanted()){
         console.log(cell);
         cell.checkCellGrowth();
+        cell.checkNeighborCells();
       }
       cell.addWater(this.waterLevel);
     })

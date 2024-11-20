@@ -39,6 +39,42 @@ class Cell extends Phaser.Physics.Arcade.Sprite{
         }
     }
 
+    checkNeighborCells() {
+        //Get the surrounding cells in all directions (left, right, up, down)
+        const directions = [
+            { x: -1, y: 0 }, //left
+            { x: 1, y: 0 },  //right
+            { x: 0, y: -1 }, //up
+            { x: 0, y: 1 }   //down
+        ];
+    
+        let adjacentSameTypeCount = 0;
+        let adjacentLowerTierCount = 0;
+    
+        //Loop through the directions to check adjacent cells
+        for (let dir of directions) {
+            const adjCell = this.scene.cellGrid[this.y / 32 + dir.y]?.[this.x / 32 + dir.x];
+    
+            if (adjCell && adjCell.checkIsPlanted()) {
+                if (adjCell.type === this.type) {
+                    adjacentSameTypeCount++;
+                } else if (this.getPlantTier(adjCell.type) === this.getPlantTier(this.type) - 1) {
+                    adjacentLowerTierCount++;
+                }
+            }
+        }
+    
+        //Grass has special rules; it cannot grow from "none" adjacent cells
+        if (this.type === "grass" && adjacentSameTypeCount < 3) {
+            return; // Grass won't grow unless there are at least 3 adjacent grass cells
+        }
+    
+        //Conditions to start growth (at least 3 same plants or one tier less surrounding)
+        if ((adjacentSameTypeCount >= 3 || adjacentLowerTierCount >= 1) && this.canGrow()) {
+            this.growthLevel = 1;  //Start growth at level 1
+        }
+    }  
+
     checkCellGrowth(){
         if(this.type == "grass" && this.scene.sunLevel >= 3 && this.grassSunRequirement >= this.grassWaterRequirement){
             console.log("Growing " + this.type);
@@ -59,5 +95,33 @@ class Cell extends Phaser.Physics.Arcade.Sprite{
 
     addWater(newWaterVal){
         this.waterLevel += newWaterVal;
+    }
+
+    //Helper function to determine the tier of a plant type
+    getPlantTier(plantType) {
+        switch (plantType) {
+            case "grass":
+                return 1;
+            case "flower":
+                return 2;
+            case "shrub":
+                return 3;
+            default:
+                return 0; //"none" or undefined
+        }
+    }
+
+    //Helper function to check if the plant can grow based on sun and water requirements
+    canGrow() {
+        switch (this.type) {
+            case "grass":
+                return this.waterLevel >= this.grassWaterRequirement && this.scene.sunLevel >= this.grassSunRequirement;
+            case "flower":
+                return this.waterLevel >= this.flowerWaterRequirement && this.scene.sunLevel >= this.flowerSunRequirement;
+            case "shrub":
+                return this.waterLevel >= this.shrubWaterRequirement && this.scene.sunLevel >= this.shrubSunRequirement;
+            default:
+                return false;
+        }
     }
 }
