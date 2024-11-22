@@ -8,6 +8,10 @@ class Cell extends Phaser.Physics.Arcade.Sprite{
 
         this.setImmovable(true);
 
+        //plant frame variable
+        this.plant = null; //initialize to null, will change depending on the plant put here
+        this.frameNumber = 0;
+
         //Cell Variables
         this.waterLevel = 0;
         this.type = "none"; //The Distinct Type of Plant: "grass", "flower", "shrub", and "none"; Cells start as "none"
@@ -28,12 +32,16 @@ class Cell extends Phaser.Physics.Arcade.Sprite{
             console.log("Planting " + plantType);
             this.type = plantType;
             this.planted = true;
+            this.plant = this.scene.add.sprite(this.x, this.y, `${plantType}`);
+            this.plant.anims.play(`sow-${plantType}`, true);
         }
     }
 
     reapCell(){
         if(this.planted == true){
             console.log("Reaped");
+            this.plant.anims.play(`reap-${this.type}`, true);
+            this.frameNumber = 0;
             this.type = "none";
             this.planted = false;
         }
@@ -79,13 +87,25 @@ class Cell extends Phaser.Physics.Arcade.Sprite{
         if(this.type == "grass" && this.scene.sunLevel >= 3 && this.grassSunRequirement >= this.grassWaterRequirement){
             console.log("Growing " + this.type);
             this.growthLevel += 1;
+            if(this.frameNumber < 3) {
+                this.frameNumber += 1;
+                this.plant.anims.play(`${Number(this.frameNumber)}-${this.type}`, true);
+            }
             this.waterLevel -= this.grassWaterRequirement;
         } else if(this.type == "flower" && this.scene.sunLevel >= this.flowerSunRequirement && this.waterLevel >= this.flowerWaterRequirement){
             this.growthLevel += 1;
             this.waterLevel -= this.flowerWaterRequirement;
+            if(this.frameNumber < 3) {
+                this.frameNumber += 1;
+                this.plant.anims.play(`${Number(this.frameNumber)}-${this.type}`, true);
+            }
         } else if(this.type == "shrub" && this.scene.sunLevel >= this.shrubSunRequirement && this.waterLevel >= this.shrubWaterRequirement){
             this.growthLevel += 1;
             this.waterLevel -= this.shrubWaterRequirement;
+            if(this.frameNumber < 3) {
+                this.frameNumber += 1;
+                this.plant.anims.play(`${Number(this.frameNumber)}-${this.type}`, true);
+            }
         }
     }
 

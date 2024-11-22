@@ -5,6 +5,8 @@ class PlayScene extends Phaser.Scene {
     this.sunLevel = 0;
     this.waterLevel = 0;
     this.playerSeedChoice = "grass";
+    this.textdepth = 11;
+    this.playerdepth = 10;
   }
 
   create() {
@@ -92,7 +94,7 @@ class PlayScene extends Phaser.Scene {
         }
       )
       .setOrigin(0.5, 0.5);
-
+    this.dayText.setDepth(this.textdepth);
     this.sunLevelText = this.add
       .text(
         this.game.config.width / 2,
@@ -104,7 +106,7 @@ class PlayScene extends Phaser.Scene {
         }
       )
       .setOrigin(0.5, 0.5);
-
+    this.sunLevelText.setDepth(this.textdepth);
     this.waterLevelText = this.add
       .text(
         this.game.config.width / 2,
@@ -116,12 +118,14 @@ class PlayScene extends Phaser.Scene {
         }
       )
       .setOrigin(0.5, 0.5);
+    this.waterLevelText.setDepth(this.textdepth);
   }
 
   createPlayer(){
     this.player = new Player(this, 100, 100, "character", 0, "down");
     this.playerSowTargetBox = this.physics.add.sprite(-10, -10).setSize(1, 1); //TargetBoxes starts off screen
     this.playerReapTargetBox = this.physics.add.sprite(-10, -10).setSize(1, 1);
+    this.player.setDepth(this.playerdepth);
   }
 
   createInteractions(){
