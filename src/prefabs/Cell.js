@@ -74,17 +74,15 @@ class Cell extends Phaser.Physics.Arcade.Sprite{
     
         //Grass has special rules; it cannot grow from "none" adjacent cells
         if (this.type === "grass" && adjacentSameTypeCount < 3) {
-            return; // Grass won't grow unless there are at least 3 adjacent grass cells
+            return adjacentSameTypeCount >= 3; //Grass needs at least 3 adjacent grass cells
         }
     
-        //Conditions to start growth (at least 3 same plants or one tier less surrounding)
-        if ((adjacentSameTypeCount >= 3 || adjacentLowerTierCount >= 1) && this.canGrow()) {
-            this.growthLevel = 1;  //Start growth at level 1
-        }
+        //For flower and shrub, check for either 3 same type or 3 lower tier
+        return adjacentSameTypeCount >= 3 || adjacentLowerTierCount >= 3;
     }  
 
     checkCellGrowth(){
-        if(this.type == "grass" && this.scene.sunLevel >= 3 && this.grassSunRequirement >= this.grassWaterRequirement){
+        if(this.type == "grass" && this.scene.sunLevel >= this.grassSunRequirement && this.waterLevel >= this.grassWaterRequirement && this.checkNeighborCells()){
             console.log("Growing " + this.type);
             this.growthLevel += 1;
             if(this.frameNumber < 3) {
@@ -92,14 +90,14 @@ class Cell extends Phaser.Physics.Arcade.Sprite{
                 this.plant.anims.play(`${Number(this.frameNumber)}-${this.type}`, true);
             }
             this.waterLevel -= this.grassWaterRequirement;
-        } else if(this.type == "flower" && this.scene.sunLevel >= this.flowerSunRequirement && this.waterLevel >= this.flowerWaterRequirement){
+        } else if(this.type == "flower" && this.scene.sunLevel >= this.flowerSunRequirement && this.waterLevel >= this.flowerWaterRequirement && this.checkNeighborCells()){
             this.growthLevel += 1;
             this.waterLevel -= this.flowerWaterRequirement;
             if(this.frameNumber < 3) {
                 this.frameNumber += 1;
                 this.plant.anims.play(`${Number(this.frameNumber)}-${this.type}`, true);
             }
-        } else if(this.type == "shrub" && this.scene.sunLevel >= this.shrubSunRequirement && this.waterLevel >= this.shrubWaterRequirement){
+        } else if(this.type == "shrub" && this.scene.sunLevel >= this.shrubSunRequirement && this.waterLevel >= this.shrubWaterRequirement && this.checkNeighborCells()){
             this.growthLevel += 1;
             this.waterLevel -= this.shrubWaterRequirement;
             if(this.frameNumber < 3) {
@@ -128,20 +126,6 @@ class Cell extends Phaser.Physics.Arcade.Sprite{
                 return 3;
             default:
                 return 0; //"none" or undefined
-        }
-    }
-
-    //Helper function to check if the plant can grow based on sun and water requirements
-    canGrow() {
-        switch (this.type) {
-            case "grass":
-                return this.waterLevel >= this.grassWaterRequirement && this.scene.sunLevel >= this.grassSunRequirement;
-            case "flower":
-                return this.waterLevel >= this.flowerWaterRequirement && this.scene.sunLevel >= this.flowerSunRequirement;
-            case "shrub":
-                return this.waterLevel >= this.shrubWaterRequirement && this.scene.sunLevel >= this.shrubSunRequirement;
-            default:
-                return false;
         }
     }
 }
