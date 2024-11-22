@@ -161,9 +161,8 @@ class PlayScene extends Phaser.Scene {
   updateGrid() {
     this.cellGroup.getChildren().forEach((cell) => {
       if (cell.checkIsPlanted()) {
-        console.log(cell);
-        cell.checkCellGrowth();
         cell.checkNeighborCells();
+        cell.checkCellGrowth();
       }
       cell.addWater(this.waterLevel);
     })
