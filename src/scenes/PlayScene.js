@@ -17,7 +17,7 @@ class PlayScene extends Phaser.Scene {
     this.bindKeys();
     this.createPlayer();
     this.createInteractions();
-    this.updateGrid()
+    this.updateGrid();
   }
 
   update() {
@@ -28,9 +28,9 @@ class PlayScene extends Phaser.Scene {
 
     if (Phaser.Input.Keyboard.JustDown(this.QKey)) {
       this.updateSeedChoice("grass");
-    } else if(Phaser.Input.Keyboard.JustDown(this.WKey)){
+    } else if (Phaser.Input.Keyboard.JustDown(this.WKey)) {
       this.updateSeedChoice("flower");
-    } else if(Phaser.Input.Keyboard.JustDown(this.EKey)){
+    } else if (Phaser.Input.Keyboard.JustDown(this.EKey)) {
       this.updateSeedChoice("shrub");
     }
   }
@@ -41,10 +41,10 @@ class PlayScene extends Phaser.Scene {
     this.generateWaterLevel();
     this.updateUI();
     this.updateGrid();
-    this.checkEndCondition()
+    this.checkEndCondition();
   }
 
-  bindKeys(){
+  bindKeys() {
     this.keys = this.input.keyboard.createCursorKeys();
     this.XKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.X);
     this.CKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.C);
@@ -56,33 +56,66 @@ class PlayScene extends Phaser.Scene {
     );
   }
 
-  createGrid(){
-    const map = this.make.tilemap({ key: "map" });
-    const tileset1 = map.addTilesetImage("grasstiles", "tileset-1");
+  //helper functions to access byte array
+  getCellIndex(row, col) {
+    return (row * this.gridWidth + col) * this.bytesPerCell;
+  }
 
-    map.createLayer("Tile Layer 1", tileset1);
+  getPlantType(row, col) {
+    return this.gridState[this.getCellIndex(row, col)];
+  }
 
-    // setting up cells
-    this.cellGroup = this.add.group();
-    this.cellGrid = [];
-    const growthWidth = 15;
-    const gridHeight = 15;
+  getWaterLevel(row, col) {
+    return this.gridState[this.getCellIndex(row, col) + 1];
+  }
+
+  getGrowthLevel(row, col) {
+    return this.gridState[this.getCellIndex(row, col) + 2];
+  }
+
+  setPlantType(row, col, type) {
+    this.gridState[this.getCellIndex(row, col)] = type;
+  }
+
+  setWaterLevel(row, col, water) {
+    this.gridState[this.getCellIndex(row, col) + 1] = water;
+  }
+
+  setGrowthLevel(row, col, growth) {
+    this.gridState[this.getCellIndex(row, col) + 2] = growth;
+  }
+
+  createGrid() {
     const cellSize = 32;
 
-    for (let row = 0; row < gridHeight; row++) {
-      this.cellGrid[row] = [];
-      for (let col = 0; col < growthWidth; col++) {
+    this.cellGroup = this.add.group();
+    this.gridWidth = 15;
+    this.gridHeight = 15;
+    // For each cell: plantType, waterLevel, growthLevel
+    this.bytesPerCell = 3;
+
+    const totalCells = this.gridWidth * this.gridHeight;
+    // byte array
+    this.gridState = new Uint8Array(totalCells * this.bytesPerCell);
+
+    for (let row = 0; row < this.gridHeight; row++) {
+      for (let col = 0; col < this.gridWidth; col++) {
+        // init the byte array and make them start with nothing
+        const index = this.getCellIndex(row, col);
+        this.gridState[index] = 0;
+        this.gridState[index + 1] = 0;
+        this.gridState[index + 2] = 0;
+
+        // now create Cell prefab
         const x = col * cellSize + cellSize / 2;
         const y = row * cellSize + cellSize / 2;
-
-        const cell = new Cell(this, x, y, "dirtTile");
-        this.cellGrid[row][col] = cell;
+        const cell = new Cell(this, x, y, "dirtTile", row, col);
         this.cellGroup.add(cell);
       }
     }
   }
 
-  createUI(){
+  createUI() {
     this.dayText = this.add
       .text(
         this.game.config.width / 2,
@@ -121,51 +154,68 @@ class PlayScene extends Phaser.Scene {
     this.waterLevelText.setDepth(this.textdepth);
   }
 
-  createPlayer(){
+  createPlayer() {
     this.player = new Player(this, 100, 100, "character", 0, "down");
     this.playerSowTargetBox = this.physics.add.sprite(-10, -10).setSize(1, 1); //TargetBoxes starts off screen
     this.playerReapTargetBox = this.physics.add.sprite(-10, -10).setSize(1, 1);
     this.player.setDepth(this.playerdepth);
   }
 
-  createInteractions(){
-    this.physics.add.overlap(this.cellGroup, this.playerSowTargetBox, (cell) => {
-      cell.sowCell(this.playerSeedChoice);
-      return;
-    });
-    this.physics.add.overlap(this.cellGroup, this.playerReapTargetBox, (cell) => {
-      cell.reapCell();
-      return;
-    });
-  }
+  createInteractions() {
+    // sowing
+    this.physics.add.overlap(
+      this.cellGroup,
+      this.playerSowTargetBox,
+      (cell) => {
+        cell.sowCell(this.playerSeedChoice);
+      }
+    );
 
-  generateSunLevel(){
+    // reaping
+    this.physics.add.overlap(
+      this.cellGroup,
+      this.playerReapTargetBox,
+      (cell) => {
+        cell.reapCell();
+      }
+    );
+  }
+  generateSunLevel() {
     this.sunLevel = Math.floor(Math.random() * 16);
   }
 
-  generateWaterLevel(){
+  generateWaterLevel() {
     this.waterLevel = Math.floor(Math.random() * 6);
   }
 
-  updateUI(){
+  updateUI() {
     this.dayText.setText(`Day: ${this.day}`);
     this.sunLevelText.setText(`Sun Level: ${this.sunLevel}`);
     this.waterLevelText.setText(`Water Level: ${this.waterLevel}`);
   }
 
-  updateSeedChoice(seedChoice){
+  updateSeedChoice(seedChoice) {
     console.log("Now planting " + seedChoice);
     this.playerSeedChoice = seedChoice;
   }
 
   updateGrid() {
     this.cellGroup.getChildren().forEach((cell) => {
-      if (cell.checkIsPlanted()) {
-        cell.checkNeighborCells();
+      const row = cell.row;
+      const col = cell.col;
+
+      // Check if planted first
+      if (this.getPlantType(row, col) !== 0) {
         cell.checkCellGrowth();
       }
-      cell.addWater(this.waterLevel);
-    })
+
+      // then add water to cell
+      this.setWaterLevel(
+        row,
+        col,
+        this.getWaterLevel(row, col) + this.waterLevel
+      );
+    });
   }
 
   checkEndCondition() {
@@ -184,5 +234,4 @@ class PlayScene extends Phaser.Scene {
   gameOver() {
     alert("End Condition Met: You Win!");
   }
-  
 }
