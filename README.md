@@ -1,6 +1,7 @@
-# Devlog Entry Intro - 11/14/2024
+# Devlogs
+## Devlog Entry Intro - 11/14/2024
 
-## Introducing the Team
+### Introducing the Team
 
 Tools Lead: Alexander Halim
 
@@ -12,7 +13,7 @@ Gameplay Design Lead: Carter Gruebel
 
 Aesthetic Design Lead: Jason Torres
 
-## Tools and Materials
+### Tools and Materials
 
 We have chosen to use Phaser3 as our main framework. This is because we all have experience with making games in Phaser3 from our time at CMPM120 - Game Development Experience. While for some of us it has been a while since we've last used Phaser3, having prior experience with this framework will allow us to tackle this project much more effectively compared to one that some of us have never used before. Furthermore, as this framework specializes in video games designed for the web, using it will help to further expand our knowledge on those types of games.
 
@@ -22,13 +23,13 @@ For the other tools that we plan on utilizing for this project, we will be using
 
 Lastly, for our alternate platform choice, we plan on changing our primary language to TypeScript. This is because whilst TypeScript is similar to JavaScript, it does come with some unique features that we've recently been introduced to during our time in this course. Thus, by switching to this language, we will be given more experience with this new language as well as develop a better understanding of how it compares to the likes of JavaScript.
 
-## Outlook
+### Outlook
 
 By developing this project, we are looking to be able to expand our knowledge of the TypeScript language and learn more about how it compares with JavaScript. We are also aiming to focus on the portability of both the JavaScript and TypeScript languages, and potentially create a game that is accessible on all web platforms without requiring our players to download it first. As a result of this, the most difficult part about this project would be the transition from JavaScript to TypeScript, as the two language's difference in abilities can result in some problems occuring down the line. Therefore, we will be sure to research how we can effectively make the switch between languages before implementing it so that we are better prepared for this challenge.
 
-# Devlog Entry 0 - 11/22/2024
+## Devlog Entry 0 - 11/22/2024
 
-## How we satisfied the software requirements
+### How we satisfied the software requirements
 
 F0.a: For the player movement, a Finite State Machine (FSM) was implemented onto the player prefab. This FSM features a Move state that is accessed whenever an arrow key is pressed, setting the player object's velocity in the desired direction. When moving either horizontally or vertically, the opposite's velocity will be set to 0, preventing the ability to walk diagonally. Originally, the movement function was handled in the PlayScene but Sean opted to handle it into a Player prefab instead for better maintenance/organization. The grid is initialized by setting up a 2D array and then looping over each row and then each column of the grid. Each cell is positioned based on its column & row index and "cellSize / 2" is used to center the cell within its grid space. The newly created cells are then stored in the 2D array.
 
@@ -44,5 +45,11 @@ F0.f: To implement this requirement, whenever the advanceDay() function is calle
 
 F0.g: To implement this requirement, we added in game over condition for the player needing to have at least a total of 5 plants that had a growth level of 3. We added in the checkEndCondition() function that will check if the player has satisfied the end game requirements when the player advances to the next day. This function iterates through all planted cells, counting the number of plants that meet the required growth level. Once the end game conditions are met the gameOver() function will trigger and an alert on the page will pop up notifying the player that they have won. By implementing this feature, we successfully provide a clear and functional play scenario completion system as required.
 
-## Reflection
+### Reflection
 Now that we have finished this part of the assignment, although we have stuck to our original plan of using Phaser3, JavaScript, and Visual Studio Code as our tools and materials, we did end up adjusting our roles as well as adopting others' whilst we tackled each requirement. For instance, since Alexander and Sean implemented most of requirements F0.a to F0.f, Carter ended up assuming more of an Engine Lead role as he volunteered to develop the function that checks what cells are around the other cells in order to determine if that cell can grow. Meanwhile, Jason took up more of a Gameplay Design Lead as he implemented the game's end conditions and Liam took on the role of the Aesthetics Design Lead as he designed all of the sprites for each cell. There is still the possibility that we will all perform the original roles that we decided upon as more of a leadership role, though we would argue that each of our roles are still very flexible and that we will assist each other from time to time.
+
+## Devlog Entry 1 - 11/27/2024
+
+### How we satisfied the software requirements
+
+### Reflection
