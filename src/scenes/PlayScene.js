@@ -18,6 +18,7 @@ class PlayScene extends Phaser.Scene {
     this.createPlayer();
     this.createInteractions();
     this.updateGrid();
+    this.createSaveLoadUI();
   }
 
   update() {
@@ -180,6 +181,26 @@ class PlayScene extends Phaser.Scene {
       }
     );
   }
+
+  createSaveLoadUI() {
+    this.saveButton1 = this.createSaveButton(0, 1);
+    this.saveButton2 = this.createSaveButton(25, 2);
+    this.saveButton3 = this.createSaveButton(50, 3);
+    this.loadButton1 = this.createLoadButton(0, 1);
+    this.loadButton2 = this.createLoadButton(25, 2);
+    this.loadButton3 = this.createLoadButton(50, 3);
+  }
+
+  createSaveButton(yOffset, slotNumber) {
+    const saveButton = this.add.text(10, 400 + yOffset, `Save Slot ${slotNumber.toString()}`, {fill: "#ffffff"}).setInteractive().on("pointerdown", () => this.saveGame(slotNumber));
+    return saveButton;
+  }
+
+  createLoadButton(yOffset, slotNumber) {
+    const loadButton = this.add.text(360, 400 + yOffset, `Load Slot ${slotNumber.toString()}`, {fill: "#ffffff"}).setInteractive().on("pointerdown", () => this.loadGame(slotNumber));
+    return loadButton;
+  }
+
   generateSunLevel() {
     this.sunLevel = Math.floor(Math.random() * 16);
   }
@@ -235,5 +256,53 @@ class PlayScene extends Phaser.Scene {
 
   gameOver() {
     alert("End Condition Met: You Win!");
+  }
+
+  //Save-Load Implementation
+  saveGame(slot) {
+    const gameData = {
+      day: this.day,
+      sunLevel: this.sunLevel,
+      waterLevel: this.waterLevel,
+      playerSeedChoice: this.playerSeedChoice,
+      gridState: Array.from(this.gridState) //Converted into a regular array for JSON Compatibility
+    };
+
+    //Save to Local Storage
+    const key = `saveSlot${slot}`;
+    localStorage.setItem(key, JSON.stringify(gameData));
+    alert(`Game Saved to Slot ${slot}`);
+  }
+
+  loadGame(slot) {
+    const key = `saveSlot${slot}`;
+    const savedData = JSON.parse(localStorage.getItem(key));
+
+    if(!savedData){
+      alert(`No saved data found in slot ${slot}`);
+      return;
+    }
+
+    //Restoring Global Variables
+    this.day = savedData.day;
+    this.sunLevel = savedData.sunLevel;
+    this.waterLevel = savedData.waterLevel;
+    this.playerSeedChoice = savedData.playerSeedChoice;
+
+    //Restoring Grid State
+    this.gridState = new Uint8Array(savedData.gridState); //Convert back to Uint8Array
+
+    this.updateUI();
+    this.cellGroup.getChildren().forEach((cell) => {
+      const row = cell.row;
+      const col = cell.col;
+
+      const plantType = this.getPlantType(row, col);
+      const growthLevel = this.getGrowthLevel(row, col);
+
+      cell.updateSprite(plantType, growthLevel);
+    });
+
+    alert(`Game Loaded from Slot ${slot}`);
   }
 }

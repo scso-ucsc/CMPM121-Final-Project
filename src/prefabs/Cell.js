@@ -157,4 +157,27 @@ class Cell extends Phaser.Physics.Arcade.Sprite {
         return 0;
     }
   }
+
+  updateSprite(plantType, growthLevel) {
+    if(plantType == 0){
+      if(this.plant){
+        this.plant.destroy();
+        this.plant = null;
+      }
+      this.setTexture("dirtTile");
+      this.setFrame(0);
+    } else{
+      const plantTexture = {
+        1: "grass",
+        2: "flower",
+        3: "shrub",
+      }[plantType];
+
+      if (!this.plant) {
+        this.plant = this.scene.add.sprite(this.x, this.y, plantTexture);
+        this.plant.setDepth(this.depth + 1);
+      }
+      this.plant.anims.play(`${growthLevel}-${plantTexture}`, true);
+    }
+  }
 }
