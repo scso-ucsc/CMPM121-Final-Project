@@ -220,11 +220,13 @@ class PlayScene extends Phaser.Scene {
 
   checkEndCondition() {
     let maturePlantCount = 0;
-    this.cellGroup.getChildren().forEach((cell) => {
-      if (cell.growthLevel >= 3) {
-        maturePlantCount++;
+    for (let row = 0; row < this.gridHeight; row++) {
+      for (let col = 0; col < this.gridWidth; col++) {
+        if (this.getGrowthLevel(row, col) >= 3) {
+          maturePlantCount++;
+        }
       }
-    });
+    }
 
     if (maturePlantCount >= 5) {
       this.gameOver();
