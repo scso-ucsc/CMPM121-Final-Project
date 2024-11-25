@@ -19,6 +19,7 @@ class PlayScene extends Phaser.Scene {
     this.createInteractions();
     this.updateGrid();
     this.createSaveLoadUI();
+    this.autoSaveInitilizer();
   }
 
   update() {
@@ -304,5 +305,66 @@ class PlayScene extends Phaser.Scene {
     });
 
     alert(`Game Loaded from Slot ${slot}`);
+  }
+
+  autoSave() {
+    const gameData = {
+      day: this.day,
+      sunLevel: this.sunLevel,
+      waterLevel: this.waterLevel,
+      playerSeedChoice: this.playerSeedChoice,
+      gridState: Array.from(this.gridState) //Converted into a regular array for JSON Compatibility
+    };
+
+    //Save to Local Storage
+    const key = `autoSave`;
+    localStorage.setItem(key, JSON.stringify(gameData));
+    console.log(`Successful Autosave!`);
+  }
+
+  loadAutoSave() {
+    const key = `autoSave`;
+    const savedData = JSON.parse(localStorage.getItem(key));
+
+    if(!savedData){
+      alert(`autoSave Not detected`);
+      return;
+    }
+
+    //Restoring Global Variables
+    this.day = savedData.day;
+    this.sunLevel = savedData.sunLevel;
+    this.waterLevel = savedData.waterLevel;
+    this.playerSeedChoice = savedData.playerSeedChoice;
+
+    //Restoring Grid State
+    this.gridState = new Uint8Array(savedData.gridState); //Convert back to Uint8Array
+
+    this.updateUI();
+    this.cellGroup.getChildren().forEach((cell) => {
+      const row = cell.row;
+      const col = cell.col;
+
+      const plantType = this.getPlantType(row, col);
+      const growthLevel = this.getGrowthLevel(row, col);
+
+      cell.updateSprite(plantType, growthLevel);
+    });
+
+    alert(`Game Restored Successfully!`);
+  }
+  autoSaveInitilizer() {
+    window.addEventListener('beforeunload', () => {
+      this.autoSave()
+    });
+    const savedData = JSON.parse(localStorage.getItem('autoSave'));
+    if(savedData){
+      const userChoice = window.confirm('Do you want to load from the autosave? (Click Cancel for to clear the autosave)');
+        if (userChoice) {
+          this.loadAutoSave();
+        } else {
+          localStorage.removeItem('autoSave');
+        }
+    }
   }
 }
