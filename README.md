@@ -53,8 +53,10 @@ Now that we have finished this part of the assignment, although we have stuck to
 ## Devlog Entry 1 - 11/27/2024
 
 ### How we satisfied the software requirements
+F0.a to F0.g: Same as last week.
 
 F1.a: The game's grid state now uses a single continguous byte array that uses the AoS approach. Each cell is represented by 3 consecutive bytes (plant type, water level, and growth level). There are getter and setter functions used to apply updates to the byte array. The cellGroup remains as a visual representation of the grid state.
+
 ![F1.a data structure diagram](./assets/f1a_diagram.png)
 
 F1.b: To implement this requirement we added a saveGame() and loadGame() function into our play scene. The saveGame() function will store the game's current data, including the global variables and state of the grid, into a constant which is then saved into the hardware's local storage. The loadGame() function extracts this data and then set the scene's current values to those extracted. After this is conducted, the entire grid and UI are updated to represent the new data. A new function updateSprite() was added to the Cell prefab in order to properly display the correct state upon being loaded. Our project currently displays three save and load buttons each, enabling the player to saved three different states at any time. These buttons are created with the newly implemented createSaveLoadUI() function that is also featured in our play scene. Players may click on this buttons to implement their respective functions.
