@@ -19,13 +19,14 @@ class Cell extends Phaser.Physics.Arcade.Sprite {
   sowCell(plantType) {
     const plantTypeCode =
       plantType === "grass" ? 1 : plantType === "flower" ? 2 : 3;
-
+  
     if (this.scene.getPlantType(this.row, this.col) === 0) {
+      this.scene.recordState(); 
       this.scene.setPlantType(this.row, this.col, plantTypeCode);
       this.scene.setGrowthLevel(this.row, this.col, 0);
-
+  
       console.log(`Planted ${plantType} at (${this.row}, ${this.col})`);
-
+  
       this.plant = this.scene.add.sprite(this.x, this.y, plantType);
       this.plant.anims.play(`sow-${plantType}`, true);
     }
@@ -33,11 +34,12 @@ class Cell extends Phaser.Physics.Arcade.Sprite {
 
   reapCell() {
     if (this.scene.getPlantType(this.row, this.col) !== 0) {
+      this.scene.recordState();
       this.scene.setPlantType(this.row, this.col, 0);
       this.scene.setGrowthLevel(this.row, this.col, 0);
-
+  
       console.log(`Reaping plant at (${this.row}, ${this.col})`);
-
+  
       if (this.plant) {
         this.plant.destroy();
         this.plant = null;

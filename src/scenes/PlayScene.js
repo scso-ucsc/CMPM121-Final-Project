@@ -279,9 +279,11 @@ class PlayScene extends Phaser.Scene {
       sunLevel: this.sunLevel,
       waterLevel: this.waterLevel,
       playerSeedChoice: this.playerSeedChoice,
-      gridState: Array.from(this.gridState) //Converted into a regular array for JSON Compatibility
+      gridState: Array.from(this.gridState), //Converted into a regular array for JSON Compatibility
+      undoStack: this.undoStack, // Save undo stack
+      redoStack: this.redoStack, // Save redo stack
     };
-
+  
     //Save to Local Storage
     const key = `saveSlot${slot}`;
     localStorage.setItem(key, JSON.stringify(gameData));
@@ -291,45 +293,36 @@ class PlayScene extends Phaser.Scene {
   loadGame(slot) {
     const key = `saveSlot${slot}`;
     const savedData = JSON.parse(localStorage.getItem(key));
-
+  
     if(!savedData){
       alert(`No saved data found in slot ${slot}`);
       return;
     }
-
-    this.undoStack.push({
-      day: this.day,
-      sunLevel: this.sunLevel,
-      waterLevel: this.waterLevel,
-      playerSeedChoice: this.playerSeedChoice,
-      gridState: Array.from(this.gridState), //Snapshot of current state
-    });
-
+  
     //Restoring Global Variables
     this.day = savedData.day;
     this.sunLevel = savedData.sunLevel;
     this.waterLevel = savedData.waterLevel;
     this.playerSeedChoice = savedData.playerSeedChoice;
-
-    //Restoring Grid State
-    this.gridState = new Uint8Array(savedData.gridState); //Convert back to Uint8Array
-
+    this.gridState = new Uint8Array(savedData.gridState); 
+  
+    // Restore undo/redo stacks
+    this.undoStack = savedData.undoStack || [];
+    this.redoStack = savedData.redoStack || [];
+  
     this.updateUI();
     this.cellGroup.getChildren().forEach((cell) => {
       const row = cell.row;
       const col = cell.col;
-
+  
       const plantType = this.getPlantType(row, col);
       const growthLevel = this.getGrowthLevel(row, col);
-
+  
       cell.updateSprite(plantType, growthLevel);
     });
-
-    this.redoStack = [];
-
+  
     alert(`Game Loaded from Slot ${slot}`);
   }
-
   autoSave() {
     const gameData = {
       day: this.day,
