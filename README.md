@@ -61,4 +61,6 @@ F1.b: To implement this requirement we added a saveGame() and loadGame() functio
 
 F1.c: The autosave mechanic was pretty straight forward once the saveGame() and loadGame() were implemented. Essentially, there is an autosave slot in localStorage that acts much the same way that the other save slots do. When the browser is reloaded or closed suddenly, a window listener detects this (using a "beforeunload" event) and uses an adapted version of the saveGame() function to create an autosave. Then, upon reloading the game, if an autosave is detected, it prompts the user to choose if they want to load the save. If they select yes, the game is restored to its previous state. The autosave is not visible to the player, as it is meant to be used only during unexpected closures. 
 
+F1.d: The undo and redo mechanics were fairly easy to implement. The mechanics were implemented using lists that are pushed to and popped from stacks that hold the pertinent information in them. This information includes sun level, water level, player state and much more. The redo stack is cleared when a save state is loaded, but the undo stack is saved based on which instance the player decides to load.
+
 ### Reflection

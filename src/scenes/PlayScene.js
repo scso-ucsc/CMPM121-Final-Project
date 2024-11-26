@@ -406,24 +406,24 @@ class PlayScene extends Phaser.Scene {
 
   undo() {
     if (this.undoStack.length > 0) {
-        // Push current state to redo stack before undoing
+        //Push current state to redo stack before undoing
         this.redoStack.push({
             day: this.day,
             sunLevel: this.sunLevel,
             waterLevel: this.waterLevel,
             playerSeedChoice: this.playerSeedChoice,
-            gridState: Array.from(this.gridState), // Convert to JSON-compatible format
+            gridState: Array.from(this.gridState), //Convert to JSON-compatible format
         });
 
-        // Restore state from undo stack
+        //Restore state from undo stack
         const previousState = this.undoStack.pop();
         this.day = previousState.day;
         this.sunLevel = previousState.sunLevel;
         this.waterLevel = previousState.waterLevel;
         this.playerSeedChoice = previousState.playerSeedChoice;
-        this.gridState = new Uint8Array(previousState.gridState); // Convert back to Uint8Array
+        this.gridState = new Uint8Array(previousState.gridState); //Convert back to Uint8Array
 
-        // Update UI and grid
+        //Update UI and grid
         this.updateUI();
         this.cellGroup.getChildren().forEach((cell) => {
             const row = cell.row;
