@@ -7,6 +7,8 @@ class PlayScene extends Phaser.Scene {
     this.playerSeedChoice = "grass";
     this.textdepth = 11;
     this.playerdepth = 10;
+    this.undoStack = [];
+    this.redoStack = [];
   }
 
   create() {
@@ -25,6 +27,7 @@ class PlayScene extends Phaser.Scene {
   update() {
     this.playerFSM.step();
     if (Phaser.Input.Keyboard.JustDown(this.advanceKey)) {
+      this.recordState();
       this.advanceDay();
     }
 
@@ -34,6 +37,12 @@ class PlayScene extends Phaser.Scene {
       this.updateSeedChoice("flower");
     } else if (Phaser.Input.Keyboard.JustDown(this.EKey)) {
       this.updateSeedChoice("shrub");
+    }
+
+    if (Phaser.Input.Keyboard.JustDown(this.undoKey)) {
+      this.undo();
+    } else if (Phaser.Input.Keyboard.JustDown(this.redoKey)) {
+      this.redo();
     }
   }
 
@@ -56,6 +65,8 @@ class PlayScene extends Phaser.Scene {
     this.advanceKey = this.input.keyboard.addKey(
       Phaser.Input.Keyboard.KeyCodes.SPACE
     );
+    this.undoKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.Z);
+    this.redoKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.Y);
   }
 
   //helper functions to access byte array
@@ -366,5 +377,77 @@ class PlayScene extends Phaser.Scene {
           localStorage.removeItem('autoSave');
         }
     }
+  }
+
+  //Undo/Redo Implementation
+  recordState() {
+    const currentState = {
+      day: this.day,
+      sunLevel: this.sunLevel,
+      waterLevel: this.waterLevel,
+      playerSeedChoice: this.playerSeedChoice,
+      gridState: Array.from(this.gridState), //Copy the grid state
+    };
+    this.undoStack.push(currentState);
+    this.redoStack = []; //Clear redo stack on new action
+  }
+
+  undo() {
+    if (this.undoStack.length === 0) {
+      console.log("Nothing to undo.");
+      return;
+    }
+
+    const previousState = this.undoStack.pop();
+    const currentState = {
+      day: this.day,
+      sunLevel: this.sunLevel,
+      waterLevel: this.waterLevel,
+      playerSeedChoice: this.playerSeedChoice,
+      gridState: Array.from(this.gridState),
+    };
+
+    this.redoStack.push(currentState); //Save current state to redo stack
+    this.restoreState(previousState);
+  }
+
+  redo() {
+    if (this.redoStack.length === 0) {
+      console.log("Nothing to redo.");
+      return;
+    }
+
+    const nextState = this.redoStack.pop();
+    const currentState = {
+      day: this.day,
+      sunLevel: this.sunLevel,
+      waterLevel: this.waterLevel,
+      playerSeedChoice: this.playerSeedChoice,
+      gridState: Array.from(this.gridState),
+    };
+
+    this.undoStack.push(currentState); //Save current state to undo stack
+    this.restoreState(nextState);
+  }
+
+  restoreState(state) {
+    this.day = state.day;
+    this.sunLevel = state.sunLevel;
+    this.waterLevel = state.waterLevel;
+    this.playerSeedChoice = state.playerSeedChoice;
+    this.gridState = new Uint8Array(state.gridState); // Restore grid state
+
+    this.updateUI();
+    this.cellGroup.getChildren().forEach((cell) => {
+      const row = cell.row;
+      const col = cell.col;
+
+      const plantType = this.getPlantType(row, col);
+      const growthLevel = this.getGrowthLevel(row, col);
+
+      cell.updateSprite(plantType, growthLevel);
+    });
+
+    console.log("State restored successfully.");
   }
 }
