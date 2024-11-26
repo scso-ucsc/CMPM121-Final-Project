@@ -47,6 +47,7 @@ class PlayScene extends Phaser.Scene {
   }
 
   advanceDay() {
+    this.pushUndoState();
     this.day++;
     this.generateSunLevel();
     this.generateWaterLevel();
@@ -104,22 +105,22 @@ class PlayScene extends Phaser.Scene {
     this.cellGroup = this.add.group();
     this.gridWidth = 15;
     this.gridHeight = 15;
-    // For each cell: plantType, waterLevel, growthLevel
+    //For each cell: plantType, waterLevel, growthLevel
     this.bytesPerCell = 3;
 
     const totalCells = this.gridWidth * this.gridHeight;
-    // byte array
+    //byte array
     this.gridState = new Uint8Array(totalCells * this.bytesPerCell);
 
     for (let row = 0; row < this.gridHeight; row++) {
       for (let col = 0; col < this.gridWidth; col++) {
-        // init the byte array and make them start with nothing
+        //init the byte array and make them start with nothing
         const index = this.getCellIndex(row, col);
         this.gridState[index] = 0;
         this.gridState[index + 1] = 0;
         this.gridState[index + 2] = 0;
 
-        // now create Cell prefab
+        //now create Cell prefab
         const x = col * cellSize + cellSize / 2;
         const y = row * cellSize + cellSize / 2;
         const cell = new Cell(this, x, y, "dirtTile", row, col);
@@ -175,7 +176,7 @@ class PlayScene extends Phaser.Scene {
   }
 
   createInteractions() {
-    // sowing
+    //sowing
     this.physics.add.overlap(
       this.cellGroup,
       this.playerSowTargetBox,
@@ -184,7 +185,7 @@ class PlayScene extends Phaser.Scene {
       }
     );
 
-    // reaping
+    //reaping
     this.physics.add.overlap(
       this.cellGroup,
       this.playerReapTargetBox,
@@ -228,6 +229,7 @@ class PlayScene extends Phaser.Scene {
   }
 
   updateSeedChoice(seedChoice) {
+    this.pushUndoState();
     console.log("Now planting " + seedChoice);
     this.playerSeedChoice = seedChoice;
   }
@@ -237,12 +239,12 @@ class PlayScene extends Phaser.Scene {
       const row = cell.row;
       const col = cell.col;
 
-      // Check if planted first
+      //Check if planted first
       if (this.getPlantType(row, col) !== 0) {
         cell.checkCellGrowth();
       }
 
-      // then add water to cell
+      //then add water to cell
       this.setWaterLevel(
         row,
         col,
@@ -295,6 +297,14 @@ class PlayScene extends Phaser.Scene {
       return;
     }
 
+    this.undoStack.push({
+      day: this.day,
+      sunLevel: this.sunLevel,
+      waterLevel: this.waterLevel,
+      playerSeedChoice: this.playerSeedChoice,
+      gridState: Array.from(this.gridState), //Snapshot of current state
+    });
+
     //Restoring Global Variables
     this.day = savedData.day;
     this.sunLevel = savedData.sunLevel;
@@ -314,6 +324,8 @@ class PlayScene extends Phaser.Scene {
 
       cell.updateSprite(plantType, growthLevel);
     });
+
+    this.redoStack = [];
 
     alert(`Game Loaded from Slot ${slot}`);
   }
@@ -393,29 +405,46 @@ class PlayScene extends Phaser.Scene {
   }
 
   undo() {
-    if (this.undoStack.length === 0) {
-      console.log("Nothing to undo.");
-      return;
+    if (this.undoStack.length > 0) {
+        // Push current state to redo stack before undoing
+        this.redoStack.push({
+            day: this.day,
+            sunLevel: this.sunLevel,
+            waterLevel: this.waterLevel,
+            playerSeedChoice: this.playerSeedChoice,
+            gridState: Array.from(this.gridState), // Convert to JSON-compatible format
+        });
+
+        // Restore state from undo stack
+        const previousState = this.undoStack.pop();
+        this.day = previousState.day;
+        this.sunLevel = previousState.sunLevel;
+        this.waterLevel = previousState.waterLevel;
+        this.playerSeedChoice = previousState.playerSeedChoice;
+        this.gridState = new Uint8Array(previousState.gridState); // Convert back to Uint8Array
+
+        // Update UI and grid
+        this.updateUI();
+        this.cellGroup.getChildren().forEach((cell) => {
+            const row = cell.row;
+            const col = cell.col;
+
+            const plantType = this.getPlantType(row, col);
+            const growthLevel = this.getGrowthLevel(row, col);
+
+            cell.updateSprite(plantType, growthLevel);
+        });
+    } else {
+        alert("No more actions to undo!");
     }
+}
 
-    const previousState = this.undoStack.pop();
-    const currentState = {
-      day: this.day,
-      sunLevel: this.sunLevel,
-      waterLevel: this.waterLevel,
-      playerSeedChoice: this.playerSeedChoice,
-      gridState: Array.from(this.gridState),
-    };
-
-    this.redoStack.push(currentState); //Save current state to redo stack
-    this.restoreState(previousState);
-  }
 
   redo() {
     if (this.redoStack.length === 0) {
-      console.log("Nothing to redo.");
+      alert("No actions to redo!");
       return;
-    }
+  }
 
     const nextState = this.redoStack.pop();
     const currentState = {
@@ -435,7 +464,7 @@ class PlayScene extends Phaser.Scene {
     this.sunLevel = state.sunLevel;
     this.waterLevel = state.waterLevel;
     this.playerSeedChoice = state.playerSeedChoice;
-    this.gridState = new Uint8Array(state.gridState); // Restore grid state
+    this.gridState = new Uint8Array(state.gridState); //Restore grid state
 
     this.updateUI();
     this.cellGroup.getChildren().forEach((cell) => {
@@ -450,4 +479,29 @@ class PlayScene extends Phaser.Scene {
 
     console.log("State restored successfully.");
   }
+
+  pushUndoState() {
+    const currentState = {
+        day: this.day,
+        sunLevel: this.sunLevel,
+        waterLevel: this.waterLevel,
+        playerSeedChoice: this.playerSeedChoice,
+        gridState: Array.from(this.gridState), //Convert to JSON-compatible format
+    };
+
+    //Avoid pushing duplicate states
+    if (
+        this.undoStack.length === 0 ||
+        JSON.stringify(this.undoStack[this.undoStack.length - 1]) !==
+            JSON.stringify(currentState)
+    ) {
+        this.undoStack.push(currentState);
+    }
+
+    //Limit the size of the undo stack (optional)
+    if (this.undoStack.length > 50) {
+        this.undoStack.shift(); //Remove the oldest state to prevent memory issues
+    }
+}
+
 }

@@ -206,7 +206,7 @@ class PreloadScene extends Phaser.Scene {
 
     //Controls Text
     document.getElementById("info").innerHTML =
-      "<strong>CONTROLS:</strong> ARROWS - Move | X - Reap Cell | C - Sow Cell | SPACE - Advance Time | Q - Choose Grass | W - Choose Flower | E - Choose Shrub";
+      "<strong>CONTROLS:</strong> ARROWS - Move | X - Reap Cell | C - Sow Cell | SPACE - Advance Time | Q - Choose Grass | W - Choose Flower | E - Choose Shrub | Z - Undo | Y - Redo";
 
     //Start Game
     this.scene.start("PlayScene");
