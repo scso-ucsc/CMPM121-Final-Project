@@ -275,100 +275,102 @@ class PlayScene extends Phaser.Scene {
   //Save-Load Implementation
   saveGame(slot) {
     const gameData = {
-      day: this.day,
-      sunLevel: this.sunLevel,
-      waterLevel: this.waterLevel,
-      playerSeedChoice: this.playerSeedChoice,
-      gridState: Array.from(this.gridState), //Converted into a regular array for JSON Compatibility
-      undoStack: this.undoStack, // Save undo stack
-      redoStack: this.redoStack, // Save redo stack
+        day: this.day,
+        sunLevel: this.sunLevel,
+        waterLevel: this.waterLevel,
+        playerSeedChoice: this.playerSeedChoice,
+        gridState: Array.from(this.gridState), // Convert Uint8Array to array for JSON compatibility
+        undoStack: this.undoStack.map((state) => JSON.stringify(state)), // Serialize each state
+        redoStack: this.redoStack.map((state) => JSON.stringify(state))  // Serialize each state
     };
-  
-    //Save to Local Storage
+
     const key = `saveSlot${slot}`;
     localStorage.setItem(key, JSON.stringify(gameData));
     alert(`Game Saved to Slot ${slot}`);
-  }
+}
 
-  loadGame(slot) {
-    const key = `saveSlot${slot}`;
-    const savedData = JSON.parse(localStorage.getItem(key));
-  
-    if(!savedData){
+loadGame(slot) {
+  const key = `saveSlot${slot}`;
+  const savedData = JSON.parse(localStorage.getItem(key));
+
+  if (!savedData) {
       alert(`No saved data found in slot ${slot}`);
       return;
-    }
-  
-    //Restoring Global Variables
-    this.day = savedData.day;
-    this.sunLevel = savedData.sunLevel;
-    this.waterLevel = savedData.waterLevel;
-    this.playerSeedChoice = savedData.playerSeedChoice;
-    this.gridState = new Uint8Array(savedData.gridState); 
-  
-    // Restore undo/redo stacks
-    this.undoStack = savedData.undoStack || [];
-    this.redoStack = savedData.redoStack || [];
-  
-    this.updateUI();
-    this.cellGroup.getChildren().forEach((cell) => {
+  }
+
+  // Restore main game state
+  this.day = savedData.day;
+  this.sunLevel = savedData.sunLevel;
+  this.waterLevel = savedData.waterLevel;
+  this.playerSeedChoice = savedData.playerSeedChoice;
+  this.gridState = new Uint8Array(savedData.gridState);
+
+  // Restore undo/redo stacks
+  this.undoStack = (savedData.undoStack || []).map((state) => JSON.parse(state));
+  this.redoStack = (savedData.redoStack || []).map((state) => JSON.parse(state));
+
+  this.updateUI();
+  this.cellGroup.getChildren().forEach((cell) => {
       const row = cell.row;
       const col = cell.col;
-  
       const plantType = this.getPlantType(row, col);
       const growthLevel = this.getGrowthLevel(row, col);
-  
       cell.updateSprite(plantType, growthLevel);
-    });
-  
-    alert(`Game Loaded from Slot ${slot}`);
+  });
+
+  alert(`Game Loaded from Slot ${slot}`);
+}
+autoSave() {
+  const gameData = {
+    day: this.day,
+    sunLevel: this.sunLevel,
+    waterLevel: this.waterLevel,
+    playerSeedChoice: this.playerSeedChoice,
+    gridState: Array.from(this.gridState), // Converted into a regular array for JSON compatibility
+    undoStack: this.undoStack, // Save undo stack
+    redoStack: this.redoStack, // Save redo stack
+  };
+
+  // Save to local storage
+  const key = `autoSave`;
+  localStorage.setItem(key, JSON.stringify(gameData));
+  console.log(`Successful Autosave!`);
+}
+
+loadAutoSave() {
+  const key = `autoSave`;
+  const savedData = JSON.parse(localStorage.getItem(key));
+
+  if (!savedData) {
+    alert(`No autosave detected`);
+    return;
   }
-  autoSave() {
-    const gameData = {
-      day: this.day,
-      sunLevel: this.sunLevel,
-      waterLevel: this.waterLevel,
-      playerSeedChoice: this.playerSeedChoice,
-      gridState: Array.from(this.gridState) //Converted into a regular array for JSON Compatibility
-    };
 
-    //Save to Local Storage
-    const key = `autoSave`;
-    localStorage.setItem(key, JSON.stringify(gameData));
-    console.log(`Successful Autosave!`);
-  }
+  // Restoring global variables
+  this.day = savedData.day;
+  this.sunLevel = savedData.sunLevel;
+  this.waterLevel = savedData.waterLevel;
+  this.playerSeedChoice = savedData.playerSeedChoice;
+  this.gridState = new Uint8Array(savedData.gridState); // Convert back to Uint8Array
 
-  loadAutoSave() {
-    const key = `autoSave`;
-    const savedData = JSON.parse(localStorage.getItem(key));
+  // Restore undo/redo stacks
+  this.undoStack = savedData.undoStack || [];
+  this.redoStack = savedData.redoStack || [];
 
-    if(!savedData){
-      alert(`autoSave Not detected`);
-      return;
-    }
+  // Update the UI and cells
+  this.updateUI();
+  this.cellGroup.getChildren().forEach((cell) => {
+    const row = cell.row;
+    const col = cell.col;
 
-    //Restoring Global Variables
-    this.day = savedData.day;
-    this.sunLevel = savedData.sunLevel;
-    this.waterLevel = savedData.waterLevel;
-    this.playerSeedChoice = savedData.playerSeedChoice;
+    const plantType = this.getPlantType(row, col);
+    const growthLevel = this.getGrowthLevel(row, col);
 
-    //Restoring Grid State
-    this.gridState = new Uint8Array(savedData.gridState); //Convert back to Uint8Array
+    cell.updateSprite(plantType, growthLevel);
+  });
 
-    this.updateUI();
-    this.cellGroup.getChildren().forEach((cell) => {
-      const row = cell.row;
-      const col = cell.col;
-
-      const plantType = this.getPlantType(row, col);
-      const growthLevel = this.getGrowthLevel(row, col);
-
-      cell.updateSprite(plantType, growthLevel);
-    });
-
-    alert(`Game Restored Successfully!`);
-  }
+  console.log(`Autosave Loaded Successfully`);
+}
   autoSaveInitilizer() {
     window.addEventListener('beforeunload', () => {
       this.autoSave()
