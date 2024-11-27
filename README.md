@@ -8,7 +8,7 @@ Tools Lead: Alexander Halim
 
 Engine Lead: Liam Murray
 
-Tools and Engine Assistant: Sean Eric So
+Production Lead, Tools and Engine Assistant: Sean Eric So
 
 Gameplay Design Lead: Carter Gruebel
 
@@ -66,3 +66,4 @@ F1.c: The autosave mechanic was pretty straight forward once the saveGame() and 
 F1.d: The undo and redo mechanics were fairly easy to implement. The mechanics were implemented using lists that are pushed to and popped from stacks that hold the pertinent information in them. This information includes sun level, water level, player state and much more. The redo stack is cleared when a save state is loaded, but the undo stack is saved based on which instance the player decides to load.
 
 ### Reflection
+The biggest change that our project had to adjust to as a result of implementing the F1 requirements was the addition of a byte array to represent our grid. This change ultimately affected how our individual prefabs interacted with the grid in terms of how our variables got stored and how they got updated. This has greatly affected how we plan on developing the gameplay design aspect of our project, especially knowing we will have to change programming languages in the future. This is because our prefabs no longer act as individual game objects but rather game objects that follow a separate attribute, similar to how flyweight patterns work. However, upon completing this change, it became a lot easier to implement the other requirements as it was now much easier to store the necessary data. With this new stage of our project, we have also begun adopting the roles that we originally set out to fulfill moreso than we did whilst working on F0, such as Carter looking into more ways in which we can improve the gameplay and Jason beginning to look into UI/UX elements to add and make our project feel more like a game. Whilst these ideas haven't been implemented fully at the moment, we can expect to see these items come into fruition very soon. Nonetheless, our roles are still pretty flexible with each of us embracing other people's roles to assist whenever we can.
