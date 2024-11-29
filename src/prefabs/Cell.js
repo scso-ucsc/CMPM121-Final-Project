@@ -1,3 +1,4 @@
+import { plantDefinitions } from "../utils/PlantDefinitions.js";
 //Cell Prefab
 class Cell extends Phaser.Physics.Arcade.Sprite {
   constructor(scene, x, y, texture, row, col) {
@@ -19,14 +20,14 @@ class Cell extends Phaser.Physics.Arcade.Sprite {
   sowCell(plantType) {
     const plantTypeCode =
       plantType === "grass" ? 1 : plantType === "flower" ? 2 : 3;
-  
+
     if (this.scene.getPlantType(this.row, this.col) === 0) {
-      this.scene.recordState(); 
+      this.scene.recordState();
       this.scene.setPlantType(this.row, this.col, plantTypeCode);
       this.scene.setGrowthLevel(this.row, this.col, 0);
-  
+
       console.log(`Planted ${plantType} at (${this.row}, ${this.col})`);
-  
+
       this.plant = this.scene.add.sprite(this.x, this.y, plantType);
       this.plant.anims.play(`sow-${plantType}`, true);
     }
@@ -37,9 +38,9 @@ class Cell extends Phaser.Physics.Arcade.Sprite {
       this.scene.recordState();
       this.scene.setPlantType(this.row, this.col, 0);
       this.scene.setGrowthLevel(this.row, this.col, 0);
-  
+
       console.log(`Reaping plant at (${this.row}, ${this.col})`);
-  
+
       if (this.plant) {
         this.plant.destroy();
         this.plant = null;
@@ -86,30 +87,34 @@ class Cell extends Phaser.Physics.Arcade.Sprite {
   }
 
   checkCellGrowth() {
-    const plantType = this.scene.getPlantType(this.row, this.col);
+    const plantTypeCode = this.scene.getPlantType(this.row, this.col);
     const waterLevel = this.scene.getWaterLevel(this.row, this.col);
-    let growthLevel = this.scene.getGrowthLevel(this.row, this.col);
+    const growthLevel = this.scene.getGrowthLevel(this.row, this.col);
+    const sunLevel = this.scene.sunLevel;
 
-    //grass
-    if (plantType === 1 && this.scene.sunLevel >= 3 && waterLevel >= 5) {
-      console.log(`Growing grass at (${this.row}, ${this.col})`);
-      this.growPlant("grass", growthLevel, waterLevel, 5);
-    } else if (
-      plantType === 2 &&
-      this.scene.sunLevel >= 10 &&
-      waterLevel >= 10
-      // flower
-    ) {
-      console.log(`Growing flower at (${this.row}, ${this.col})`);
-      this.growPlant("flower", growthLevel, waterLevel, 10);
-    } else if (
-      plantType === 3 &&
-      this.scene.sunLevel >= 7 &&
-      waterLevel >= 20
-      // shrub
-    ) {
-      console.log(`Growing shrub at (${this.row}, ${this.col})`);
-      this.growPlant("shrub", growthLevel, waterLevel, 20);
+    const plantDef = plantDefinitions.find(
+      (def) => def.typeCode === plantTypeCode
+    );
+
+    if (!plantDef) {
+      return;
+    }
+
+    // loop through plant's growth conditions
+    for (const condition of plantDef.growthConditions) {
+      if (
+        sunLevel >= condition.minSun &&
+        waterLevel >= condition.minWater &&
+        growthLevel < 3
+      ) {
+        this.growPlant(
+          plantDef.type,
+          growthLevel,
+          waterLevel,
+          condition.waterRequired
+        );
+        break;
+      }
     }
   }
 
@@ -161,14 +166,14 @@ class Cell extends Phaser.Physics.Arcade.Sprite {
   }
 
   updateSprite(plantType, growthLevel) {
-    if(plantType == 0){
-      if(this.plant){
+    if (plantType == 0) {
+      if (this.plant) {
         this.plant.destroy();
         this.plant = null;
       }
       this.setTexture("dirtTile");
       this.setFrame(0);
-    } else{
+    } else {
       const plantTexture = {
         1: "grass",
         2: "flower",
@@ -183,3 +188,5 @@ class Cell extends Phaser.Physics.Arcade.Sprite {
     }
   }
 }
+
+export default Cell;
