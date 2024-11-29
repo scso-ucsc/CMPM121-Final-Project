@@ -1,27 +1,57 @@
+import ScenarioParser from "../utils/ScenarioParser.js";
+
 class PlayScene extends Phaser.Scene {
   constructor() {
     super("PlayScene");
     this.day = 1;
     this.sunLevel = 0;
     this.waterLevel = 0;
+    this.waterMultiplier = 1;
     this.playerSeedChoice = "grass";
+
+    this.victoryConditions = {};
+    this.weatherPolicy = {};
+    this.eventsQueue = [];
+
     this.textdepth = 11;
     this.playerdepth = 10;
     this.undoStack = [];
     this.redoStack = [];
   }
 
+  async loadScenario(filePath) {
+    const response = await fetch(filePath);
+    const text = await response.text();
+    const parser = new ScenarioParser(text);
+    return parser.parse();
+  }
+
   create() {
-    this.generateSunLevel();
-    this.generateWaterLevel();
-    this.createGrid();
     this.createUI();
     this.bindKeys();
     this.createPlayer();
-    this.createInteractions();
-    this.updateGrid();
-    this.createSaveLoadUI();
-    this.autoSaveInitilizer();
+
+    //Loading External DSL and applying data
+    this.loadScenario("assets/scenarios/defaultScenario.txt").then((scenario) => {
+      this.day = scenario.StartingConditions.Day;
+      this.sunLevel = scenario.StartingConditions.SunLevel;
+      this.waterLevel = scenario.StartingConditions.WaterLevel;
+      this.playerSeedChoice = scenario.StartingConditions.PlayerSeedChoice;
+
+      this.victoryConditions = scenario.VictoryConditions;
+      this.weatherPolicy = scenario.WeatherPolicy;
+      this.eventsQueue = Object.entries(scenario.Events).map(([day, event]) => {
+        return { day: parseInt(day), ...event };
+      }).sort((a, b) => a.day - b.day);
+
+      this.createGrid();
+      this.createInteractions();
+      this.updateGrid();
+      this.updateUI();
+
+      this.createSaveLoadUI();
+      this.autoSaveInitilizer();
+    });
   }
 
   update() {
@@ -49,8 +79,17 @@ class PlayScene extends Phaser.Scene {
   advanceDay() {
     this.pushUndoState();
     this.day++;
-    this.generateSunLevel();
-    this.generateWaterLevel();
+    this.generateWeather();
+
+    const event = this.eventsQueue.find(e => e.day === this.day);
+    if(event){
+      if(event.SunRange) this.weatherPolicy.SunRange = event.SunRange;
+      if(event.WaterRange) this.weatherPolicy.WaterRange = event.WaterRange;
+      if(event.WaterMultiplier) this.waterMultiplier = event.WaterMultiplier;
+      if(event.Message) alert(event.Message);
+      if(event.MaturePlantsRequired) this.victoryConditions.MaturePlantsRequired = event.MaturePlantsRequired;
+    }
+
     this.updateUI();
     this.updateGrid();
     this.checkEndCondition();
@@ -142,6 +181,7 @@ class PlayScene extends Phaser.Scene {
       )
       .setOrigin(0.5, 0.5);
     this.dayText.setDepth(this.textdepth);
+
     this.sunLevelText = this.add
       .text(
         this.game.config.width / 2,
@@ -154,6 +194,7 @@ class PlayScene extends Phaser.Scene {
       )
       .setOrigin(0.5, 0.5);
     this.sunLevelText.setDepth(this.textdepth);
+
     this.waterLevelText = this.add
       .text(
         this.game.config.width / 2,
@@ -166,6 +207,9 @@ class PlayScene extends Phaser.Scene {
       )
       .setOrigin(0.5, 0.5);
     this.waterLevelText.setDepth(this.textdepth);
+
+    this.seedChoiceText = this.add.text(this.game.config.width / 2, (this.game.config.height / 10) * 2.5, `Seed Choice: ${this.playerSeedChoice}`, {fontSize: "18px", color: "#ffffff"}).setOrigin(0.5, 0.5);
+    this.seedChoiceText.setDepth(this.textdepth);
   }
 
   createPlayer() {
@@ -214,18 +258,19 @@ class PlayScene extends Phaser.Scene {
     return loadButton;
   }
 
-  generateSunLevel() {
-    this.sunLevel = Math.floor(Math.random() * 16);
-  }
+  generateWeather(){
+    const [sunMin, sunMax] = this.weatherPolicy.SunRange;
+    const [waterMin, waterMax] = this.weatherPolicy.WaterRange;
 
-  generateWaterLevel() {
-    this.waterLevel = Math.floor(Math.random() * 6);
+    this.sunLevel = Math.floor(Math.random() * (sunMax - sunMin + 1)) + sunMin;
+    this.waterLevel = (Math.floor(Math.random() * (waterMax - waterMin + 1)) + waterMin) * this.waterMultiplier;
   }
 
   updateUI() {
     this.dayText.setText(`Day: ${this.day}`);
     this.sunLevelText.setText(`Sun Level: ${this.sunLevel}`);
     this.waterLevelText.setText(`Water Level: ${this.waterLevel}`);
+    this.seedChoiceText.setText(`Seed Choice: ${this.playerSeedChoice}`);
   }
 
   updateSeedChoice(seedChoice) {
@@ -263,13 +308,23 @@ class PlayScene extends Phaser.Scene {
       }
     }
 
-    if (maturePlantCount >= 5) {
-      this.gameOver();
+    if (maturePlantCount >= this.victoryConditions.MaturePlantsRequired) {
+      this.gameOver("win");
+      return;
+    }
+
+    if(this.day >= this.victoryConditions.MaximumDays){
+      this.gameOver("lose");
+      return;
     }
   }
 
-  gameOver() {
-    alert("End Condition Met: You Win!");
+  gameOver(outcome) {
+    if(outcome === "lose"){
+      alert("End Condition Not Met: You Lose!");
+    } else{
+      alert("End Condition Met: You Win!");
+    }
   }
 
   //Save-Load Implementation
@@ -320,6 +375,7 @@ loadGame(slot) {
 
   alert(`Game Loaded from Slot ${slot}`);
 }
+
 autoSave() {
   const gameData = {
     day: this.day,
@@ -432,7 +488,7 @@ loadAutoSave() {
     } else {
         alert("No more actions to undo!");
     }
-}
+  }
 
 
   redo() {
@@ -497,6 +553,7 @@ loadAutoSave() {
     if (this.undoStack.length > 50) {
         this.undoStack.shift(); //Remove the oldest state to prevent memory issues
     }
+  }
 }
 
-}
+export default PlayScene;

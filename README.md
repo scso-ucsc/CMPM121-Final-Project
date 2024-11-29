@@ -67,3 +67,32 @@ F1.d: The undo and redo mechanics were fairly easy to implement. The mechanics w
 
 ### Reflection
 The biggest change that our project had to adjust to as a result of implementing the F1 requirements was the addition of a byte array to represent our grid. This change ultimately affected how our individual prefabs interacted with the grid in terms of how our variables got stored and how they got updated. This has greatly affected how we plan on developing the gameplay design aspect of our project, especially knowing we will have to change programming languages in the future. This is because our prefabs no longer act as individual game objects but rather game objects that follow a separate attribute, similar to how flyweight patterns work. However, upon completing this change, it became a lot easier to implement the other requirements as it was now much easier to store the necessary data. With this new stage of our project, we have also begun adopting the roles that we originally set out to fulfill moreso than we did whilst working on F0, such as Carter looking into more ways in which we can improve the gameplay and Jason beginning to look into UI/UX elements to add and make our project feel more like a game. Whilst these ideas haven't been implemented fully at the moment, we can expect to see these items come into fruition very soon. Nonetheless, our roles are still pretty flexible with each of us embracing other people's roles to assist whenever we can.
+
+## Devlog Entry 2 - 12/2/2024
+
+### How we satisfied the software requirements
+
+### F0+F1
+F0.d: With the addition of our External DSL, the sun level and water level of the current day is instead determined by a new function generateWeather(). This function takes the minimum and maximum values for both sun and water from our defaultScenario.txt file and generates a random number between them accordingly. Additional, should the event WaterMultiplier exist, then the generated water value will be doubled for the day. This occurs when the event signifying a rainstorm from the defaultScenario.txt has occurred.
+
+F0.g: Like with the minimum and maximum values of the sun and water levels, our win condition is also defined in our external DSL. The supplied value from this text file is checked against the current number of mature plants on the player's grid. If the player has reached the desired amount of plants, they win. Additionally, a lose condition has also been added via this external DSL, which is called when the player has reached day 20 and hasn't grown enough mature plants.
+
+No major changes were made to the other preceeding requirements.
+
+### External DSL for Scenario Design
+Our External DSL is featured in the defaultScenario.txt that's being kept in the new scenarios folder that's inside our assets folder. It is parsed by our new ScenarioParser.js module that gets called by our play scene. Our DSL is mostly INI-inspired but includes some TOML aspects so that it may include arrays, nested keys, and game-specific data needed for our project. The following is an example segment of our DSL:
+
+```[Events]
+Day 5:
+    SunRange = [5, 15]
+    WaterRange = [0, 3]
+    Message = "There is a drought! The sun is stronger than ever but water levels are now low."
+```
+
+In our code sample above, we are using INI for the sake of defining our headers, such as with `[Events]`, in order to store the desired values in the correct fields to then be later used by our project. TOML is then used for array values such as the `SunRange = [5, 15]` to represent the minimum and maximum values of sun our game can generate after this specific day. TOML is also used for typed data, as demonstrated with our `Message`. Both INI and TOML were used specifically because they are easier to read and offers simple syntax, making them less complicated to decipher.
+
+### Internal DSL for Plants and Growth Conditions
+
+### Switch to Alternate Platform
+
+## Reflection

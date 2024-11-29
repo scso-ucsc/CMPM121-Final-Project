@@ -1,5 +1,7 @@
 "use strict";
 
+import PlayScene from "./scenes/PlayScene.js";
+
 const WIDTH = 480;
 const HEIGHT = 480;
 
