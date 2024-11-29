@@ -53,6 +53,7 @@ Now that we have finished this part of the assignment, although we have stuck to
 ## Devlog Entry 1 - 11/27/2024
 
 ### How we satisfied the software requirements
+
 F0.a to F0.g: Same as last week.
 
 F1.a: The game's grid state now uses a single continguous byte array that uses the AoS approach. Each cell is represented by 3 consecutive bytes (plant type, water level, and growth level). There are getter and setter functions used to apply updates to the byte array. The cellGroup remains as a visual representation of the grid state.
@@ -61,11 +62,12 @@ F1.a: The game's grid state now uses a single continguous byte array that uses t
 
 F1.b: To implement this requirement we added a saveGame() and loadGame() function into our play scene. The saveGame() function will store the game's current data, including the global variables and state of the grid, into a constant which is then saved into the hardware's local storage. The loadGame() function extracts this data and then set the scene's current values to those extracted. After this is conducted, the entire grid and UI are updated to represent the new data. A new function updateSprite() was added to the Cell prefab in order to properly display the correct state upon being loaded. Our project currently displays three save and load buttons each, enabling the player to saved three different states at any time. These buttons are created with the newly implemented createSaveLoadUI() function that is also featured in our play scene. Players may click on this buttons to implement their respective functions.
 
-F1.c: The autosave mechanic was pretty straight forward once the saveGame() and loadGame() were implemented. Essentially, there is an autosave slot in localStorage that acts much the same way that the other save slots do. When the browser is reloaded or closed suddenly, a window listener detects this (using a "beforeunload" event) and uses an adapted version of the saveGame() function to create an autosave. Then, upon reloading the game, if an autosave is detected, it prompts the user to choose if they want to load the save. If they select yes, the game is restored to its previous state. The autosave is not visible to the player, as it is meant to be used only during unexpected closures. 
+F1.c: The autosave mechanic was pretty straight forward once the saveGame() and loadGame() were implemented. Essentially, there is an autosave slot in localStorage that acts much the same way that the other save slots do. When the browser is reloaded or closed suddenly, a window listener detects this (using a "beforeunload" event) and uses an adapted version of the saveGame() function to create an autosave. Then, upon reloading the game, if an autosave is detected, it prompts the user to choose if they want to load the save. If they select yes, the game is restored to its previous state. The autosave is not visible to the player, as it is meant to be used only during unexpected closures.
 
 F1.d: The undo and redo mechanics were fairly easy to implement. The mechanics were implemented using lists that are pushed to and popped from stacks that hold the pertinent information in them. This information includes sun level, water level, player state and much more. The redo stack is cleared when a save state is loaded, but the undo stack is saved based on which instance the player decides to load.
 
 ### Reflection
+
 The biggest change that our project had to adjust to as a result of implementing the F1 requirements was the addition of a byte array to represent our grid. This change ultimately affected how our individual prefabs interacted with the grid in terms of how our variables got stored and how they got updated. This has greatly affected how we plan on developing the gameplay design aspect of our project, especially knowing we will have to change programming languages in the future. This is because our prefabs no longer act as individual game objects but rather game objects that follow a separate attribute, similar to how flyweight patterns work. However, upon completing this change, it became a lot easier to implement the other requirements as it was now much easier to store the necessary data. With this new stage of our project, we have also begun adopting the roles that we originally set out to fulfill moreso than we did whilst working on F0, such as Carter looking into more ways in which we can improve the gameplay and Jason beginning to look into UI/UX elements to add and make our project feel more like a game. Whilst these ideas haven't been implemented fully at the moment, we can expect to see these items come into fruition very soon. Nonetheless, our roles are still pretty flexible with each of us embracing other people's roles to assist whenever we can.
 
 ## Devlog Entry 2 - 12/2/2024
@@ -73,6 +75,7 @@ The biggest change that our project had to adjust to as a result of implementing
 ### How we satisfied the software requirements
 
 ### F0+F1
+
 F0.d: With the addition of our External DSL, the sun level and water level of the current day is instead determined by a new function generateWeather(). This function takes the minimum and maximum values for both sun and water from our defaultScenario.txt file and generates a random number between them accordingly. Additional, should the event WaterMultiplier exist, then the generated water value will be doubled for the day. This occurs when the event signifying a rainstorm from the defaultScenario.txt has occurred.
 
 F0.g: Like with the minimum and maximum values of the sun and water levels, our win condition is also defined in our external DSL. The supplied value from this text file is checked against the current number of mature plants on the player's grid. If the player has reached the desired amount of plants, they win. Additionally, a lose condition has also been added via this external DSL, which is called when the player has reached day 20 and hasn't grown enough mature plants.
@@ -80,6 +83,7 @@ F0.g: Like with the minimum and maximum values of the sun and water levels, our 
 No major changes were made to the other preceeding requirements.
 
 ### External DSL for Scenario Design
+
 Our External DSL is featured in the defaultScenario.txt that's being kept in the new scenarios folder that's inside our assets folder. It is parsed by our new ScenarioParser.js module that gets called by our play scene. Our DSL is mostly INI-inspired but includes some TOML aspects so that it may include arrays, nested keys, and game-specific data needed for our project. The following is an example segment of our DSL:
 
 ```[Events]
@@ -92,6 +96,25 @@ Day 5:
 In our code sample above, we are using INI for the sake of defining our headers, such as with `[Events]`, in order to store the desired values in the correct fields to then be later used by our project. TOML is then used for array values such as the `SunRange = [5, 15]` to represent the minimum and maximum values of sun our game can generate after this specific day. TOML is also used for typed data, as demonstrated with our `Message`. Both INI and TOML were used specifically because they are easier to read and offers simple syntax, making them less complicated to decipher.
 
 ### Internal DSL for Plants and Growth Conditions
+
+The Internal DSL is handled in the PlantDefinitions.js seen in the utils folder. The plantDefinitions array acts as the central catalog for all the plant types in the game. Each plant type as the following properties as seen in the grass example below:
+
+```
+  {
+    type: "grass",
+    typeCode: 1,
+    growthConditions: [
+      {
+        minSun: 3,
+        minWater: 5,
+        waterRequired: 5,
+      },
+    ],
+    icon: "🌱",
+  },
+```
+
+When the game checks to see if a plant can grow in the checkCellGrowth function, it will use the plantDefintions DSL to get the plant's requirements. The UI is also updated to fit the icon field in the DSL field (concerning the player's current Seed Choice).
 
 ### Switch to Alternate Platform
 
