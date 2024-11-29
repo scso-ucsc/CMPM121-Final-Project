@@ -97,7 +97,7 @@ In our code sample above, we are using INI for the sake of defining our headers,
 
 ### Internal DSL for Plants and Growth Conditions
 
-The Internal DSL is handled in the PlantDefinitions.js seen in the utils folder. The plantDefinitions array acts as the central catalog for all the plant types in the game. Each plant type as the following properties as seen in the grass example below:
+The Internal DSL is handled in the PlantDefinitions.js seen in the utils folder. The plantDefinitions array acts as the central catalog for all the plant types in the game. Each plant type has the following properties as seen in the grass example below:
 
 ```
   {
