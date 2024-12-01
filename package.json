@@ -1,0 +1,16 @@
+{
+  "name": "cmpm121-final-project",
+  "version": "1.0.0",
+  "description": "## Devlog Entry Intro - 11/14/2024",
+  "main": "index.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "serve ./dist"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
