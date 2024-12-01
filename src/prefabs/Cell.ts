@@ -1,46 +1,55 @@
-import { plantDefinitions } from "../utils/PlantDefinitions.js";
-//Cell Prefab
+import { PlantDefinition, plantDefinitions } from "../utils/PlantDefinitions";
+import Phaser from "phaser";
+
 class Cell extends Phaser.Physics.Arcade.Sprite {
-  constructor(scene, x, y, texture, row, col) {
+  private scene: Phaser.Scene;
+  private row: number;
+  private col: number;
+  private planted: boolean;
+  private waterLevel: number;
+  private plant: Phaser.GameObjects.Sprite | null;
+  private frameNumber: number;
+
+  constructor(
+    scene: Phaser.Scene,
+    x: number,
+    y: number,
+    texture: string,
+    row: number,
+    col: number
+  ) {
     super(scene, x, y, texture);
     scene.add.existing(this);
     scene.physics.add.existing(this);
-
+    this.setImmovable(true);
     this.scene = scene;
     this.row = row;
     this.col = col;
-
-    this.setImmovable(true);
-
-    // Initial properties
     this.plant = null;
     this.frameNumber = 0;
+    this.planted = false;
+    this.waterLevel = 0;
   }
 
-  sowCell(plantType) {
-    const plantTypeCode =
-      plantType === "grass" ? 1 : plantType === "flower" ? 2 : 3;
-
+  sowCell(plantType: "grass" | "flower" | "shrub"): void {
+    const plantTypeCode = plantType === "grass" ? 1 : plantType === "flower" ? 2 : 3;
+    
     if (this.scene.getPlantType(this.row, this.col) === 0) {
       this.scene.recordState();
       this.scene.setPlantType(this.row, this.col, plantTypeCode);
       this.scene.setGrowthLevel(this.row, this.col, 0);
-
       console.log(`Planted ${plantType} at (${this.row}, ${this.col})`);
-
       this.plant = this.scene.add.sprite(this.x, this.y, plantType);
       this.plant.anims.play(`sow-${plantType}`, true);
     }
   }
 
-  reapCell() {
+  reapCell(): void {
     if (this.scene.getPlantType(this.row, this.col) !== 0) {
       this.scene.recordState();
       this.scene.setPlantType(this.row, this.col, 0);
       this.scene.setGrowthLevel(this.row, this.col, 0);
-
       console.log(`Reaping plant at (${this.row}, ${this.col})`);
-
       if (this.plant) {
         this.plant.destroy();
         this.plant = null;
@@ -48,45 +57,42 @@ class Cell extends Phaser.Physics.Arcade.Sprite {
     }
   }
 
-  checkNeighborCells() {
-    //Get the surrounding cells in all directions (left, right, up, down)
+  checkNeighborCells(): boolean {
+    // Directions for adjacent cells
     const directions = [
-      { x: -1, y: 0 }, //left
-      { x: 1, y: 0 }, //right
-      { x: 0, y: -1 }, //up
-      { x: 0, y: 1 }, //down
+      { x: -1, y: 0 },
+      { x: 1, y: 0 },
+      { x: 0, y: -1 },
+      { x: 0, y: 1 },
     ];
 
     let adjacentSameTypeCount = 0;
     let adjacentLowerTierCount = 0;
 
-    //Loop through the directions to check adjacent cells
-    for (let dir of directions) {
+    for (const dir of directions) {
       const adjCell =
         this.scene.cellGrid[this.y / 32 + dir.y]?.[this.x / 32 + dir.x];
-
+        
       if (adjCell && adjCell.checkIsPlanted()) {
+        const adjTier = this.getPlantTier(adjCell.type);
+        const thisTier = this.getPlantTier(this.type);
+
         if (adjCell.type === this.type) {
           adjacentSameTypeCount++;
-        } else if (
-          this.getPlantTier(adjCell.type) ===
-          this.getPlantTier(this.type) - 1
-        ) {
+        } else if (adjTier === thisTier - 1) {
           adjacentLowerTierCount++;
         }
       }
     }
 
-    //Grass has special rules; it cannot grow from "none" adjacent cells
     if (this.type === "grass" && adjacentSameTypeCount < 3) {
-      return adjacentSameTypeCount >= 3; //Grass needs at least 3 adjacent grass cells
+      return adjacentSameTypeCount >= 3;
     }
 
-    //For flower and shrub, check for either 3 same type or 3 lower tier
     return adjacentSameTypeCount >= 3 || adjacentLowerTierCount >= 3;
   }
 
-  checkCellGrowth() {
+  checkCellGrowth(): void {
     const plantTypeCode = this.scene.getPlantType(this.row, this.col);
     const waterLevel = this.scene.getWaterLevel(this.row, this.col);
     const growthLevel = this.scene.getGrowthLevel(this.row, this.col);
@@ -96,11 +102,8 @@ class Cell extends Phaser.Physics.Arcade.Sprite {
       (def) => def.typeCode === plantTypeCode
     );
 
-    if (!plantDef) {
-      return;
-    }
+    if (!plantDef) return;
 
-    // loop through plant's growth conditions
     for (const condition of plantDef.growthConditions) {
       if (
         sunLevel >= condition.minSun &&
@@ -117,31 +120,7 @@ class Cell extends Phaser.Physics.Arcade.Sprite {
       }
     }
   }
-
-  growPlant(plantType, growthLevel, waterLevel, waterRequirement) {
-    if (growthLevel < 3) {
-      growthLevel++;
-      this.scene.setGrowthLevel(this.row, this.col, growthLevel);
-
-      // update water level
-      this.scene.setWaterLevel(
-        this.row,
-        this.col,
-        waterLevel - waterRequirement
-      );
-
-      // update animation
-      if (this.plant) {
-        this.plant.anims.play(`${growthLevel}-${plantType}`, true);
-      }
-    } else {
-      console.log(
-        `${plantType.charAt(0).toUpperCase() + plantType.slice(1)} at (${
-          this.row
-        }, ${this.col}) is already fully grown.`
-      );
-    }
-  }
+}
 
   checkIsPlanted() {
     return this.planted;
