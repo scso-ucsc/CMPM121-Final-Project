@@ -1,34 +1,33 @@
+import Phaser from 'phaser';
 import ScenarioParser from "../utils/ScenarioParser.js";
 import { plantDefinitions } from "../utils/PlantDefinitions.js";
 import Cell from "../prefabs/Cell.js";
 
 class PlayScene extends Phaser.Scene {
+  day: number = 1;
+  sunLevel: number = 0
+  waterLevel: number = 0;
+  waterMultiplier: number = 1;
+  playerSeedChoice: string = "grass";
+  textdepth: number = 11;
+  playerdepth: number = 10;
+  victoryConditions = {};
+  weatherPolicy = {};
+  eventsQueue = [];
+  undoStack = [];
+  redoStack = [];
   constructor() {
     super("PlayScene");
-    this.day = 1;
-    this.sunLevel = 0;
-    this.waterLevel = 0;
-    this.waterMultiplier = 1;
-    this.playerSeedChoice = "grass";
-
-    this.victoryConditions = {};
-    this.weatherPolicy = {};
-    this.eventsQueue = [];
-
-    this.textdepth = 11;
-    this.playerdepth = 10;
-    this.undoStack = [];
-    this.redoStack = [];
   }
 
-  async loadScenario(filePath) {
+  async loadScenario(filePath: RequestInfo | URL) {
     const response = await fetch(filePath);
     const text = await response.text();
     const parser = new ScenarioParser(text);
     return parser.parse();
   }
 
-  getPlantIcon(seedChoice) {
+  getPlantIcon(seedChoice: string) {
     const plantDef = plantDefinitions.find(
       (plant) => plant.type === seedChoice
     );
@@ -54,7 +53,7 @@ class PlayScene extends Phaser.Scene {
           .map(([day, event]) => {
             return { day: parseInt(day), ...event };
           })
-          .sort((a, b) => a.day - b.day);
+          .sort((a: { day: number; }, b: { day: number; }) => a.day - b.day);
 
         this.createGrid();
         this.createInteractions();
@@ -111,45 +110,48 @@ class PlayScene extends Phaser.Scene {
   }
 
   bindKeys() {
-    this.keys = this.input.keyboard.createCursorKeys();
-    this.XKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.X);
-    this.CKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.C);
-    this.QKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.Q);
-    this.WKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W);
-    this.EKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.E);
-    this.advanceKey = this.input.keyboard.addKey(
+    const keyboard = this.input.keyboard;
+    if(keyboard) {
+    this.keys = keyboard.createCursorKeys();
+    this.XKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.X);
+    this.CKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.C);
+    this.QKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.Q);
+    this.WKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W);
+    this.EKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.E);
+    this.advanceKey = keyboard.addKey(
       Phaser.Input.Keyboard.KeyCodes.SPACE
     );
-    this.undoKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.Z);
-    this.redoKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.Y);
+    this.undoKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.Z);
+    this.redoKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.Y);
+    }
   }
 
   //helper functions to access byte array
-  getCellIndex(row, col) {
+  getCellIndex(row: number, col: number) {
     return (row * this.gridWidth + col) * this.bytesPerCell;
   }
 
-  getPlantType(row, col) {
+  getPlantType(row: number, col: number) {
     return this.gridState[this.getCellIndex(row, col)];
   }
 
-  getWaterLevel(row, col) {
+  getWaterLevel(row: number, col: number) {
     return this.gridState[this.getCellIndex(row, col) + 1];
   }
 
-  getGrowthLevel(row, col) {
+  getGrowthLevel(row: number, col: number) {
     return this.gridState[this.getCellIndex(row, col) + 2];
   }
 
-  setPlantType(row, col, type) {
+  setPlantType(row: number, col: number, type) {
     this.gridState[this.getCellIndex(row, col)] = type;
   }
 
-  setWaterLevel(row, col, water) {
+  setWaterLevel(row: number, col: number, water) {
     this.gridState[this.getCellIndex(row, col) + 1] = water;
   }
 
-  setGrowthLevel(row, col, growth) {
+  setGrowthLevel(row: number, col: number, growth) {
     this.gridState[this.getCellIndex(row, col) + 2] = growth;
   }
 
@@ -270,7 +272,7 @@ class PlayScene extends Phaser.Scene {
     this.loadButton3 = this.createLoadButton(50, 3);
   }
 
-  createSaveButton(yOffset, slotNumber) {
+  createSaveButton(yOffset: number, slotNumber: number) {
     const saveButton = this.add
       .text(10, 400 + yOffset, `Save Slot ${slotNumber.toString()}`, {
         fill: "#ffffff",
@@ -280,7 +282,7 @@ class PlayScene extends Phaser.Scene {
     return saveButton;
   }
 
-  createLoadButton(yOffset, slotNumber) {
+  createLoadButton(yOffset: number, slotNumber: number) {
     const loadButton = this.add
       .text(360, 400 + yOffset, `Load Slot ${slotNumber.toString()}`, {
         fill: "#ffffff",
@@ -310,7 +312,7 @@ class PlayScene extends Phaser.Scene {
     );
   }
 
-  updateSeedChoice(seedChoice) {
+  updateSeedChoice(seedChoice: string) {
     this.pushUndoState();
     console.log("Now planting " + seedChoice);
 
@@ -320,7 +322,7 @@ class PlayScene extends Phaser.Scene {
   }
 
   updateGrid() {
-    this.cellGroup.getChildren().forEach((cell) => {
+    this.cellGroup.getChildren().forEach((cell: { row: any; col: any; checkCellGrowth: () => void; }) => {
       const row = cell.row;
       const col = cell.col;
 
@@ -359,7 +361,7 @@ class PlayScene extends Phaser.Scene {
     }
   }
 
-  gameOver(outcome) {
+  gameOver(outcome: string) {
     if (outcome === "lose") {
       alert("End Condition Not Met: You Lose!");
     } else {
@@ -368,7 +370,7 @@ class PlayScene extends Phaser.Scene {
   }
 
   //Save-Load Implementation
-  saveGame(slot) {
+  saveGame(slot: any) {
     const gameData = {
       day: this.day,
       sunLevel: this.sunLevel,
@@ -384,7 +386,7 @@ class PlayScene extends Phaser.Scene {
     alert(`Game Saved to Slot ${slot}`);
   }
 
-  loadGame(slot) {
+  loadGame(slot: any) {
     const key = `saveSlot${slot}`;
     const savedData = JSON.parse(localStorage.getItem(key));
 
@@ -401,15 +403,15 @@ class PlayScene extends Phaser.Scene {
     this.gridState = new Uint8Array(savedData.gridState);
 
     // Restore undo/redo stacks
-    this.undoStack = (savedData.undoStack || []).map((state) =>
+    this.undoStack = (savedData.undoStack || []).map((state: string) =>
       JSON.parse(state)
     );
-    this.redoStack = (savedData.redoStack || []).map((state) =>
+    this.redoStack = (savedData.redoStack || []).map((state: string) =>
       JSON.parse(state)
     );
 
     this.updateUI();
-    this.cellGroup.getChildren().forEach((cell) => {
+    this.cellGroup.getChildren().forEach((cell: { row: any; col: any; updateSprite: (arg0: any, arg1: any) => void; }) => {
       const row = cell.row;
       const col = cell.col;
       const plantType = this.getPlantType(row, col);
@@ -459,7 +461,7 @@ class PlayScene extends Phaser.Scene {
 
     // Update the UI and cells
     this.updateUI();
-    this.cellGroup.getChildren().forEach((cell) => {
+    this.cellGroup.getChildren().forEach((cell: { row: any; col: any; updateSprite: (arg0: any, arg1: any) => void; }) => {
       const row = cell.row;
       const col = cell.col;
 
@@ -522,7 +524,7 @@ class PlayScene extends Phaser.Scene {
 
       //Update UI and grid
       this.updateUI();
-      this.cellGroup.getChildren().forEach((cell) => {
+      this.cellGroup.getChildren().forEach((cell: { row: any; col: any; updateSprite: (arg0: any, arg1: any) => void; }) => {
         const row = cell.row;
         const col = cell.col;
 
@@ -555,7 +557,7 @@ class PlayScene extends Phaser.Scene {
     this.restoreState(nextState);
   }
 
-  restoreState(state) {
+  restoreState(state: { day: number; sunLevel: number; waterLevel: number; playerSeedChoice: string; gridState: Iterable<number>; } | undefined) {
     this.day = state.day;
     this.sunLevel = state.sunLevel;
     this.waterLevel = state.waterLevel;
@@ -563,7 +565,7 @@ class PlayScene extends Phaser.Scene {
     this.gridState = new Uint8Array(state.gridState); //Restore grid state
 
     this.updateUI();
-    this.cellGroup.getChildren().forEach((cell) => {
+    this.cellGroup.getChildren().forEach((cell: { row: any; col: any; updateSprite: (arg0: any, arg1: any) => void; }) => {
       const row = cell.row;
       const col = cell.col;
 

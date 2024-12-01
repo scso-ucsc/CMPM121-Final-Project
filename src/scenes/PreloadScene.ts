@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 class PreloadScene extends Phaser.Scene {
   constructor() {
     super("PreloadScene");
@@ -205,9 +206,11 @@ class PreloadScene extends Phaser.Scene {
     this.createPlantAnimations();
 
     //Controls Text
-    document.getElementById("info").innerHTML =
+    const info = document.getElementById("info")
+    if(info){
+      info.innerHTML =
       "<strong>CONTROLS:</strong> ARROWS - Move | X - Reap Cell | C - Sow Cell | SPACE - Advance Time | Q - Choose Grass | W - Choose Flower | E - Choose Shrub | Z - Undo | Y - Redo";
-
+    }
     //Start Game
     this.scene.start("PlayScene");
   }
