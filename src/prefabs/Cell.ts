@@ -1,4 +1,4 @@
-import { PlantDefinition, plantDefinitions } from "../utils/PlantDefinitions";
+import { plantDefinitions } from "../utils/PlantDefinitions";
 import Phaser from "phaser";
 
 class Cell extends Phaser.Physics.Arcade.Sprite {
@@ -120,18 +120,17 @@ class Cell extends Phaser.Physics.Arcade.Sprite {
       }
     }
   }
-}
 
-  checkIsPlanted() {
+  checkIsPlanted(): boolean {
     return this.planted;
   }
 
-  addWater(newWaterVal) {
+  addWater(newWaterVal: number): void {
     this.waterLevel += newWaterVal;
   }
 
   //Helper function to determine the tier of a plant type
-  getPlantTier(plantType) {
+  getPlantTier(plantType: "grass" | "flower" | "shrub"): number {
     switch (plantType) {
       case "grass":
         return 1;
@@ -144,8 +143,9 @@ class Cell extends Phaser.Physics.Arcade.Sprite {
     }
   }
 
-  updateSprite(plantType, growthLevel) {
-    if (plantType == 0) {
+  updateSprite(plantType: 0 | 1 | 2 | 3, growthLevel: number): void {
+    if (plantType === 0) {
+      // No plant on the cell
       if (this.plant) {
         this.plant.destroy();
         this.plant = null;
@@ -153,12 +153,14 @@ class Cell extends Phaser.Physics.Arcade.Sprite {
       this.setTexture("dirtTile");
       this.setFrame(0);
     } else {
-      const plantTexture = {
+      // Map plantType codes to their respective textures
+      const plantTextureMap: { [key: number]: string } = {
         1: "grass",
         2: "flower",
         3: "shrub",
-      }[plantType];
-
+      };
+  
+      const plantTexture = plantTextureMap[plantType];
       if (!this.plant) {
         this.plant = this.scene.add.sprite(this.x, this.y, plantTexture);
         this.plant.setDepth(this.depth + 1);
