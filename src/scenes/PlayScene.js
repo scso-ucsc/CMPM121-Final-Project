@@ -361,7 +361,7 @@ class PlayScene extends Phaser.Scene {
 
   gameOver(outcome) {
     if (outcome === "lose") {
-      //alert("End Condition Not Met: You Lose!");
+      alert("End Condition Not Met: You Lose!");
     } else {
       alert("End Condition Met: You Win!");
     }

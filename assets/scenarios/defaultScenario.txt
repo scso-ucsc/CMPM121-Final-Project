@@ -21,7 +21,7 @@ Day 10:
     SunRange = [3, 10]
     WaterRange = [1, 5]
     WaterMultiplier = 2
-    Message = "Rainstorm! We levels now at an all time high."
+    Message = "Rainstorm! Water levels now at an all time high."
 Day 15:
     MaturePlantsRequired = 10
     Message = "Extra Challenge: You must now grow 10 mature plants instead."
