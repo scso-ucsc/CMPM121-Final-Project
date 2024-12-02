@@ -4,7 +4,7 @@
   "description": "## Devlog Entry Intro - 11/14/2024",
   "main": "index.js",
   "directories": {
-    "lib": "lib"
+    "lib": "es2017"
   },
   "scripts": {
     "build": "tsc",

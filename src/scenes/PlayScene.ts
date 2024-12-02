@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import ScenarioParser from "../utils/ScenarioParser.js";
+import ScenarioParser, { Result, EventDay, NonEventSection } from "../utils/ScenarioParser2.ts";
 import { plantDefinitions } from "../utils/PlantDefinitions.js";
 import Cell from "../prefabs/Cell.js";
 
@@ -11,9 +11,9 @@ class PlayScene extends Phaser.Scene {
   playerSeedChoice: string = "grass";
   textdepth: number = 11;
   playerdepth: number = 10;
-  victoryConditions = {};
-  weatherPolicy = {};
-  eventsQueue = [];
+  victoryConditions: NonEventSection = {};
+  weatherPolicy: NonEventSection = {};
+  eventsQueue: EventDay[] = [];
   undoStack = [];
   redoStack = [];
   constructor() {
@@ -42,13 +42,13 @@ class PlayScene extends Phaser.Scene {
     //Loading External DSL and applying data
     this.loadScenario("assets/scenarios/defaultScenario.txt").then(
       (scenario) => {
-        this.day = scenario.StartingConditions.Day;
-        this.sunLevel = scenario.StartingConditions.SunLevel;
-        this.waterLevel = scenario.StartingConditions.WaterLevel;
-        this.playerSeedChoice = scenario.StartingConditions.PlayerSeedChoice;
+        this.day = scenario.StartingConditions.Day as number;
+        this.sunLevel = scenario.StartingConditions.SunLevel as number;
+        this.waterLevel = scenario.StartingConditions.WaterLevel as number;
+        this.playerSeedChoice = scenario.StartingConditions.PlayerSeedChoice as string;
 
-        this.victoryConditions = scenario.VictoryConditions;
-        this.weatherPolicy = scenario.WeatherPolicy;
+        this.victoryConditions = scenario.VictoryConditions as NonEventSection;
+        this.weatherPolicy = scenario.WeatherPolicy as NonEventSection;
         this.eventsQueue = Object.entries(scenario.Events)
           .map(([day, event]) => {
             return { day: parseInt(day), ...event };
@@ -97,7 +97,7 @@ class PlayScene extends Phaser.Scene {
     if (event) {
       if (event.SunRange) this.weatherPolicy.SunRange = event.SunRange;
       if (event.WaterRange) this.weatherPolicy.WaterRange = event.WaterRange;
-      if (event.WaterMultiplier) this.waterMultiplier = event.WaterMultiplier;
+      if (event.WaterMultiplier) this.waterMultiplier = event.WaterMultiplier as number;
       if (event.Message) alert(event.Message);
       if (event.MaturePlantsRequired)
         this.victoryConditions.MaturePlantsRequired =
