@@ -69,6 +69,7 @@ class ScenarioParser {
 
       // If it's an event day header like `Day X:`
       if (currentSection === "Events" && line.match(/^Day \d+:/)) {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const [_, day] = line.split(" ");
         const sanitizedDay = day.replace(":", "").trim();
         (result[currentSection] as EventsSection)[sanitizedDay] = {}; // Type-safe cast for 'Events'

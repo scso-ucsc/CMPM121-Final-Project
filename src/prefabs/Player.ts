@@ -41,7 +41,7 @@ class State {
 }
 
 // State Machine Class
-class StateMachine {
+export class StateMachine {
     private states: { [key: string]: State };
     private currentState: State;
     private currentStateName: string;

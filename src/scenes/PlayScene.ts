@@ -2,6 +2,8 @@ import Phaser from 'phaser';
 import ScenarioParser, { Result, EventDay, NonEventSection } from "../utils/ScenarioParser2.ts";
 import { plantDefinitions } from "../utils/PlantDefinitions.js";
 import Cell from "../prefabs/Cell.js";
+import { Player, StateMachine } from "../prefabs/Player.ts"
+import { game } from "../main.ts"
 
 class PlayScene extends Phaser.Scene {
   day: number = 1;
@@ -16,6 +18,37 @@ class PlayScene extends Phaser.Scene {
   eventsQueue: EventDay[] = [];
   undoStack = [];
   redoStack = [];
+  playerFSM: StateMachine | null = null;
+  player: Player | null = null;
+
+  //key bind variables
+  keys: Phaser.Types.Input.Keyboard.CursorKeys | null = null;
+  advanceKey: Phaser.Input.Keyboard.Key | null = null;
+  QKey: Phaser.Input.Keyboard.Key | null = null;
+  WKey: Phaser.Input.Keyboard.Key | null = null;
+  EKey: Phaser.Input.Keyboard.Key | null = null;
+  XKey: Phaser.Input.Keyboard.Key | null = null;
+  CKey: Phaser.Input.Keyboard.Key | null = null;
+  undoKey: Phaser.Input.Keyboard.Key | null = null;
+  redoKey: Phaser.Input.Keyboard.Key | null = null;
+
+  //plant and grid variables
+  bytesPerCell: number = 3;
+  cellGroup = this.add.group();
+  gridWidth: number = 15;
+  gridHeight: number = 15;
+  gridState: Uint8Array = new Uint8Array(this.gridWidth * this.gridHeight * this.bytesPerCell);
+
+  //text variables
+  dayText: Phaser.GameObjects.Text | null = null;
+  sunLevelText: Phaser.GameObjects.Text | null = null;
+  waterLevelText: Phaser.GameObjects.Text | null = null;
+  seedChoiceText: Phaser.GameObjects.Text | null = null;
+
+  //player variables
+  playerSowTargetBox: Phaser.GameObjects.Sprite | null = null;
+  playerReapTargetBox: Phaser.GameObjects.Sprite | null = null;
+
   constructor() {
     super("PlayScene");
   }
@@ -67,23 +100,25 @@ class PlayScene extends Phaser.Scene {
   }
 
   update() {
-    this.playerFSM.step();
-    if (Phaser.Input.Keyboard.JustDown(this.advanceKey)) {
+    if(this.playerFSM){
+      this.playerFSM.update();
+    }
+    if (Phaser.Input.Keyboard.JustDown(this.advanceKey as Phaser.Input.Keyboard.Key)) {
       this.recordState();
       this.advanceDay();
     }
 
-    if (Phaser.Input.Keyboard.JustDown(this.QKey)) {
+    if (Phaser.Input.Keyboard.JustDown(this.QKey as Phaser.Input.Keyboard.Key)) {
       this.updateSeedChoice("grass");
-    } else if (Phaser.Input.Keyboard.JustDown(this.WKey)) {
+    } else if (Phaser.Input.Keyboard.JustDown(this.WKey as Phaser.Input.Keyboard.Key)) {
       this.updateSeedChoice("flower");
-    } else if (Phaser.Input.Keyboard.JustDown(this.EKey)) {
+    } else if (Phaser.Input.Keyboard.JustDown(this.EKey as Phaser.Input.Keyboard.Key)) {
       this.updateSeedChoice("shrub");
     }
 
-    if (Phaser.Input.Keyboard.JustDown(this.undoKey)) {
+    if (Phaser.Input.Keyboard.JustDown(this.undoKey as Phaser.Input.Keyboard.Key)) {
       this.undo();
-    } else if (Phaser.Input.Keyboard.JustDown(this.redoKey)) {
+    } else if (Phaser.Input.Keyboard.JustDown(this.redoKey as Phaser.Input.Keyboard.Key)) {
       this.redo();
     }
   }
@@ -143,15 +178,15 @@ class PlayScene extends Phaser.Scene {
     return this.gridState[this.getCellIndex(row, col) + 2];
   }
 
-  setPlantType(row: number, col: number, type) {
+  setPlantType(row: number, col: number, type: number) {
     this.gridState[this.getCellIndex(row, col)] = type;
   }
 
-  setWaterLevel(row: number, col: number, water) {
+  setWaterLevel(row: number, col: number, water: number) {
     this.gridState[this.getCellIndex(row, col) + 1] = water;
   }
 
-  setGrowthLevel(row: number, col: number, growth) {
+  setGrowthLevel(row: number, col: number, growth: number) {
     this.gridState[this.getCellIndex(row, col) + 2] = growth;
   }
 
@@ -188,8 +223,8 @@ class PlayScene extends Phaser.Scene {
   createUI() {
     this.dayText = this.add
       .text(
-        this.game.config.width / 2,
-        this.game.config.height / 10,
+        (game.config.width as number) / 2,
+        (game.config.height as number) / 10,
         `Day: ${this.day}`,
         {
           fontSize: "24px",
@@ -201,8 +236,8 @@ class PlayScene extends Phaser.Scene {
 
     this.sunLevelText = this.add
       .text(
-        this.game.config.width / 2,
-        (this.game.config.height / 10) * 1.5,
+        game.config.width as number / 2,
+        (game.config.height as number / 10) * 1.5,
         `Sun Level: ${this.sunLevel}`,
         {
           fontSize: "18px",
@@ -214,8 +249,8 @@ class PlayScene extends Phaser.Scene {
 
     this.waterLevelText = this.add
       .text(
-        this.game.config.width / 2,
-        (this.game.config.height / 10) * 2,
+        game.config.width as number / 2,
+        (game.config.height as number / 10) * 2,
         `Water Level: ${this.waterLevel}`,
         {
           fontSize: "18px",
@@ -227,8 +262,8 @@ class PlayScene extends Phaser.Scene {
 
     this.seedChoiceText = this.add
       .text(
-        this.game.config.width / 2,
-        (this.game.config.height / 10) * 2.5,
+        game.config.width as number / 2,
+        (game.config.height as number / 10) * 2.5,
         `Seed Choice: ${this.playerSeedChoice}`,
         { fontSize: "18px", color: "#ffffff" }
       )
@@ -247,7 +282,7 @@ class PlayScene extends Phaser.Scene {
     //sowing
     this.physics.add.overlap(
       this.cellGroup,
-      this.playerSowTargetBox,
+      this.playerSowTargetBox as Phaser.GameObjects.Sprite,
       (cell) => {
         cell.sowCell(this.playerSeedChoice);
       }
@@ -256,7 +291,7 @@ class PlayScene extends Phaser.Scene {
     //reaping
     this.physics.add.overlap(
       this.cellGroup,
-      this.playerReapTargetBox,
+      this.playerReapTargetBox as Phaser.GameObjects.Sprite,
       (cell) => {
         cell.reapCell();
       }
@@ -304,10 +339,10 @@ class PlayScene extends Phaser.Scene {
 
   updateUI() {
     const seedIcon = this.getPlantIcon(this.playerSeedChoice);
-    this.dayText.setText(`Day: ${this.day}`);
-    this.sunLevelText.setText(`Sun Level: ${this.sunLevel}`);
-    this.waterLevelText.setText(`Water Level: ${this.waterLevel}`);
-    this.seedChoiceText.setText(
+    (this.dayText as Phaser.GameObjects.Text).setText(`Day: ${this.day}`);
+    (this.sunLevelText as Phaser.GameObjects.Text).setText(`Sun Level: ${this.sunLevel}`);
+    (this.waterLevelText as Phaser.GameObjects.Text).setText(`Water Level: ${this.waterLevel}`);
+    (this.seedChoiceText as Phaser.GameObjects.Text).setText(
       `Seed Choice: ${seedIcon} ${this.playerSeedChoice}`
     );
   }
@@ -317,7 +352,7 @@ class PlayScene extends Phaser.Scene {
     console.log("Now planting " + seedChoice);
 
     const seedIcon = this.getPlantIcon(seedChoice);
-    this.seedChoiceText.setText(`Seed Choice: ${seedIcon} ${seedChoice}`);
+    (this.seedChoiceText as Phaser.GameObjects.Text).setText(`Seed Choice: ${seedIcon} ${seedChoice}`);
     this.playerSeedChoice = seedChoice;
   }
 
@@ -350,12 +385,12 @@ class PlayScene extends Phaser.Scene {
       }
     }
 
-    if (maturePlantCount >= this.victoryConditions.MaturePlantsRequired) {
+    if (maturePlantCount >= (this.victoryConditions.MaturePlantsRequired as number)) {
       this.gameOver("win");
       return;
     }
 
-    if (this.day >= this.victoryConditions.MaximumDays) {
+    if (this.day >= (this.victoryConditions.MaximumDays as number)) {
       this.gameOver("lose");
       return;
     }
@@ -516,11 +551,13 @@ class PlayScene extends Phaser.Scene {
 
       //Restore state from undo stack
       const previousState = this.undoStack.pop();
-      this.day = previousState.day;
-      this.sunLevel = previousState.sunLevel;
-      this.waterLevel = previousState.waterLevel;
-      this.playerSeedChoice = previousState.playerSeedChoice;
-      this.gridState = new Uint8Array(previousState.gridState); //Convert back to Uint8Array
+      if(previousState){
+        this.day = previousState.day;
+        this.sunLevel = previousState.sunLevel;
+        this.waterLevel = previousState.waterLevel;
+        this.playerSeedChoice = previousState.playerSeedChoice;
+        this.gridState = new Uint8Array(previousState.gridState); //Convert back to Uint8Array
+      }
 
       //Update UI and grid
       this.updateUI();
