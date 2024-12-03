@@ -33,8 +33,9 @@ class Cell extends Phaser.Physics.Arcade.Sprite {
   }
 
   sowCell(plantType: "grass" | "flower" | "shrub"): void {
-    const plantTypeCode = plantType === "grass" ? 1 : plantType === "flower" ? 2 : 3;
-    
+    const plantTypeCode =
+      plantType === "grass" ? 1 : plantType === "flower" ? 2 : 3;
+
     if (this.parentScene.getPlantType(this.row, this.col) === 0) {
       this.parentScene.recordState();
       this.parentScene.setPlantType(this.row, this.col, plantTypeCode);
@@ -71,10 +72,10 @@ class Cell extends Phaser.Physics.Arcade.Sprite {
     let adjacentLowerTierCount = 0;
 
     for (const dir of directions) {
-      if(this.parentScene.cellGrid) {
+      if (this.parentScene.cellGrid) {
         const adjCell =
           this.parentScene.cellGrid[this.y / 32 + dir.y]?.[this.x / 32 + dir.x];
-          
+
         if (adjCell && adjCell.checkIsPlanted()) {
           const adjTier = this.getPlantTier(adjCell.type);
           const thisTier = this.getPlantTier(this.type);
@@ -124,13 +125,18 @@ class Cell extends Phaser.Physics.Arcade.Sprite {
     }
   }
 
-  growPlant(plantType: string, growthLevel: number, waterLevel: number, waterRequirement: number) {
+  growPlant(
+    plantType: "grass" | "flower" | "shrub",
+    growthLevel: number,
+    waterLevel: number,
+    waterRequirement: number
+  ): void {
     if (growthLevel < 3) {
       growthLevel++;
-      this.parentScene.setGrowthLevel(this.row, this.col, growthLevel);
+      this.scene.setGrowthLevel(this.row, this.col, growthLevel);
 
       // update water level
-      this.parentScene.setWaterLevel(
+      this.scene.setWaterLevel(
         this.row,
         this.col,
         waterLevel - waterRequirement
@@ -149,7 +155,7 @@ class Cell extends Phaser.Physics.Arcade.Sprite {
     }
   }
 
-  checkIsPlanted() {
+  checkIsPlanted(): boolean {
     return this.planted;
   }
 
@@ -187,7 +193,11 @@ class Cell extends Phaser.Physics.Arcade.Sprite {
       }[plantType];
 
       if (!this.plant) {
-        this.plant = this.scene.add.sprite(this.x, this.y, plantTexture as string);
+        this.plant = this.scene.add.sprite(
+          this.x,
+          this.y,
+          plantTexture as string
+        );
         this.plant.setDepth(this.depth + 1);
       }
       this.plant.anims.play(`${growthLevel}-${plantTexture}`, true);
