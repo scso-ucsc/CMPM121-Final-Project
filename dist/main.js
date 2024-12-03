@@ -1,27 +1,31 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-const PlayScene_js_1 = __importDefault(require("./scenes/PlayScene.js"));
+import Phaser from 'phaser';
+import PlayScene from "./scenes/PlayScene.js";
+import PreloadScene from "./scenes/PreloadScene.js";
 const WIDTH = 480;
 const HEIGHT = 480;
-const SHARED_CONFIG = {
+const config = {
+    //parent: 'gameView',
+    type: Phaser.AUTO,
+    render: {
+        pixelArt: true
+    },
+    physics: {
+        default: 'arcade',
+        arcade: {
+        //debug: true,
+        //gravity: { y: 1000 }
+        }
+    },
     width: WIDTH,
     height: HEIGHT,
+    scale: {
+        mode: Phaser.Scale.FIT,
+        autoCenter: Phaser.Scale.CENTER_BOTH
+    },
+    scene: [PreloadScene, PlayScene]
 };
-const Scenes = [PreloadScene, PlayScene_js_1.default];
-const createScene = (Scene) => new Scene(SHARED_CONFIG);
-// iterates over all the scenes, and creating a new instance of that scene with SHARED_CONFIG
-const initScenes = () => Scenes.map(createScene);
-let config = Object.assign(Object.assign({ type: Phaser.AUTO }, SHARED_CONFIG), { render: {
-        pixelArt: true,
-    }, physics: {
-        default: "arcade",
-        arcade: {
-            debug: true,
-        },
-    }, scene: initScenes() });
-let game = new Phaser.Game(config);
-let { height, width } = game.config;
+export const game = new Phaser.Game(config);
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const { height, width } = game.config;
 //# sourceMappingURL=main.js.map

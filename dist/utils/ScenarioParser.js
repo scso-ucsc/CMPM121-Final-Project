@@ -1,18 +1,16 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-//DSL Parser for the scenario file
 class ScenarioParser {
     constructor(text) {
         this.text = text;
     }
     parse() {
-        const lines = this.text.split('\n');
+        const lines = this.text.split("\n");
         const result = {};
         let currentSection = null;
         let currentEventDay = null;
         for (let line of lines) {
             line = line.trim();
-            if (!line || line.startsWith("#")) { // Skip empty lines and comments
+            if (!line || line.startsWith("#")) {
+                // Skip empty lines and comments
                 continue;
             }
             //If line is a header
@@ -22,7 +20,7 @@ class ScenarioParser {
                 currentEventDay = null;
                 continue;
             }
-            if (currentSection === "Events" && line.match(/^Day \d+:/)) {
+            if (currentSection === "Events" && /^Day \d+:/.test(line)) {
                 const [_, day] = line.split(" ");
                 const sanitizedDay = day.replace(":", "").trim();
                 result[currentSection][sanitizedDay] = {};
@@ -36,9 +34,10 @@ class ScenarioParser {
                 continue;
             }
             if (currentSection === "Events" && currentEventDay) {
-                result[currentSection][currentEventDay][key] = this.parseValue(value);
+                result[currentSection][currentEventDay][key] =
+                    this.parseValue(value);
             }
-            else {
+            else if (currentSection) {
                 result[currentSection][key] = this.parseValue(value);
             }
         }
@@ -48,8 +47,8 @@ class ScenarioParser {
         if (value.startsWith("[") && value.endsWith("]")) {
             return JSON.parse(value.replace(/'/g, '"')); //Parse arrays
         }
-        return isNaN(value) ? value.replace(/"/g, "") : parseFloat(value);
+        return isNaN(Number(value)) ? value.replace(/"/g, "") : parseFloat(value);
     }
 }
-exports.default = ScenarioParser;
+export default ScenarioParser;
 //# sourceMappingURL=ScenarioParser.js.map

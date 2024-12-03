@@ -1,4 +1,3 @@
-"use strict";
 class PreloadScene extends Phaser.Scene {
     constructor() {
         super("PreloadScene");
@@ -197,10 +196,14 @@ class PreloadScene extends Phaser.Scene {
         this.createPlayerAnimations();
         this.createPlantAnimations();
         //Controls Text
-        document.getElementById("info").innerHTML =
-            "<strong>CONTROLS:</strong> ARROWS - Move | X - Reap Cell | C - Sow Cell | SPACE - Advance Time | Q - Choose Grass | W - Choose Flower | E - Choose Shrub | Z - Undo | Y - Redo";
+        const info = document.getElementById("info");
+        if (info) {
+            info.innerHTML =
+                "<strong>CONTROLS:</strong> ARROWS - Move | X - Reap Cell | C - Sow Cell | SPACE - Advance Time | Q - Choose Grass | W - Choose Flower | E - Choose Shrub | Z - Undo | Y - Redo";
+        }
         //Start Game
         this.scene.start("PlayScene");
     }
 }
+export default PreloadScene;
 //# sourceMappingURL=PreloadScene.js.map

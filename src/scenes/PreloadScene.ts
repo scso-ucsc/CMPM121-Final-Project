@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 class PreloadScene extends Phaser.Scene {
   constructor() {
     super("PreloadScene");
@@ -215,3 +214,4 @@ class PreloadScene extends Phaser.Scene {
     this.scene.start("PlayScene");
   }
 }
+export default PreloadScene;

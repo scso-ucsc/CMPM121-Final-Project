@@ -1,7 +1,4 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.plantDefinitions = void 0;
-exports.plantDefinitions = [
+export const plantDefinitions = [
     {
         type: "grass",
         typeCode: 1,

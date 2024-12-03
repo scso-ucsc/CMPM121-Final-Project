@@ -1,13 +1,14 @@
 import { plantDefinitions } from "../utils/PlantDefinitions";
+import PlayScene from "../scenes/PlayScene";
 import Phaser from "phaser";
 
 class Cell extends Phaser.Physics.Arcade.Sprite {
-  private scene: Phaser.Scene;
-  private row: number;
-  private col: number;
-  private planted: boolean;
-  private waterLevel: number;
-  private plant: Phaser.GameObjects.Sprite | null;
+  private parentScene: PlayScene;
+  public row: number;
+  public col: number;
+  public planted: boolean;
+  public waterLevel: number;
+  public plant: Phaser.GameObjects.Sprite | null;
   private frameNumber: number;
 
   constructor(
@@ -22,7 +23,7 @@ class Cell extends Phaser.Physics.Arcade.Sprite {
     scene.add.existing(this);
     scene.physics.add.existing(this);
     this.setImmovable(true);
-    this.scene = scene;
+    this.parentScene = scene as PlayScene;
     this.row = row;
     this.col = col;
     this.plant = null;
@@ -34,10 +35,10 @@ class Cell extends Phaser.Physics.Arcade.Sprite {
   sowCell(plantType: "grass" | "flower" | "shrub"): void {
     const plantTypeCode = plantType === "grass" ? 1 : plantType === "flower" ? 2 : 3;
     
-    if (this.scene.getPlantType(this.row, this.col) === 0) {
-      this.scene.recordState();
-      this.scene.setPlantType(this.row, this.col, plantTypeCode);
-      this.scene.setGrowthLevel(this.row, this.col, 0);
+    if (this.parentScene.getPlantType(this.row, this.col) === 0) {
+      this.parentScene.recordState();
+      this.parentScene.setPlantType(this.row, this.col, plantTypeCode);
+      this.parentScene.setGrowthLevel(this.row, this.col, 0);
       console.log(`Planted ${plantType} at (${this.row}, ${this.col})`);
       this.plant = this.scene.add.sprite(this.x, this.y, plantType);
       this.plant.anims.play(`sow-${plantType}`, true);
@@ -45,10 +46,10 @@ class Cell extends Phaser.Physics.Arcade.Sprite {
   }
 
   reapCell(): void {
-    if (this.scene.getPlantType(this.row, this.col) !== 0) {
-      this.scene.recordState();
-      this.scene.setPlantType(this.row, this.col, 0);
-      this.scene.setGrowthLevel(this.row, this.col, 0);
+    if (this.parentScene.getPlantType(this.row, this.col) !== 0) {
+      this.parentScene.recordState();
+      this.parentScene.setPlantType(this.row, this.col, 0);
+      this.parentScene.setGrowthLevel(this.row, this.col, 0);
       console.log(`Reaping plant at (${this.row}, ${this.col})`);
       if (this.plant) {
         this.plant.destroy();
@@ -70,17 +71,19 @@ class Cell extends Phaser.Physics.Arcade.Sprite {
     let adjacentLowerTierCount = 0;
 
     for (const dir of directions) {
-      const adjCell =
-        this.scene.cellGrid[this.y / 32 + dir.y]?.[this.x / 32 + dir.x];
-        
-      if (adjCell && adjCell.checkIsPlanted()) {
-        const adjTier = this.getPlantTier(adjCell.type);
-        const thisTier = this.getPlantTier(this.type);
+      if(this.parentScene.cellGrid) {
+        const adjCell =
+          this.parentScene.cellGrid[this.y / 32 + dir.y]?.[this.x / 32 + dir.x];
+          
+        if (adjCell && adjCell.checkIsPlanted()) {
+          const adjTier = this.getPlantTier(adjCell.type);
+          const thisTier = this.getPlantTier(this.type);
 
-        if (adjCell.type === this.type) {
-          adjacentSameTypeCount++;
-        } else if (adjTier === thisTier - 1) {
-          adjacentLowerTierCount++;
+          if (adjCell.type === this.type) {
+            adjacentSameTypeCount++;
+          } else if (adjTier === thisTier - 1) {
+            adjacentLowerTierCount++;
+          }
         }
       }
     }
@@ -93,10 +96,10 @@ class Cell extends Phaser.Physics.Arcade.Sprite {
   }
 
   checkCellGrowth(): void {
-    const plantTypeCode = this.scene.getPlantType(this.row, this.col);
-    const waterLevel = this.scene.getWaterLevel(this.row, this.col);
-    const growthLevel = this.scene.getGrowthLevel(this.row, this.col);
-    const sunLevel = this.scene.sunLevel;
+    const plantTypeCode = this.parentScene.getPlantType(this.row, this.col);
+    const waterLevel = this.parentScene.getWaterLevel(this.row, this.col);
+    const growthLevel = this.parentScene.getGrowthLevel(this.row, this.col);
+    const sunLevel = this.parentScene.sunLevel;
 
     const plantDef = plantDefinitions.find(
       (def) => def.typeCode === plantTypeCode
@@ -121,16 +124,41 @@ class Cell extends Phaser.Physics.Arcade.Sprite {
     }
   }
 
-  checkIsPlanted(): boolean {
+  growPlant(plantType: string, growthLevel: number, waterLevel: number, waterRequirement: number) {
+    if (growthLevel < 3) {
+      growthLevel++;
+      this.parentScene.setGrowthLevel(this.row, this.col, growthLevel);
+
+      // update water level
+      this.parentScene.setWaterLevel(
+        this.row,
+        this.col,
+        waterLevel - waterRequirement
+      );
+
+      // update animation
+      if (this.plant) {
+        this.plant.anims.play(`${growthLevel}-${plantType}`, true);
+      }
+    } else {
+      console.log(
+        `${plantType.charAt(0).toUpperCase() + plantType.slice(1)} at (${
+          this.row
+        }, ${this.col}) is already fully grown.`
+      );
+    }
+  }
+
+  checkIsPlanted() {
     return this.planted;
   }
 
-  addWater(newWaterVal: number): void {
+  addWater(newWaterVal: number) {
     this.waterLevel += newWaterVal;
   }
 
   //Helper function to determine the tier of a plant type
-  getPlantTier(plantType: "grass" | "flower" | "shrub"): number {
+  getPlantTier(plantType: string) {
     switch (plantType) {
       case "grass":
         return 1;
@@ -143,9 +171,8 @@ class Cell extends Phaser.Physics.Arcade.Sprite {
     }
   }
 
-  updateSprite(plantType: 0 | 1 | 2 | 3, growthLevel: number): void {
-    if (plantType === 0) {
-      // No plant on the cell
+  updateSprite(plantType: number, growthLevel: number) {
+    if (plantType == 0) {
       if (this.plant) {
         this.plant.destroy();
         this.plant = null;
@@ -153,16 +180,14 @@ class Cell extends Phaser.Physics.Arcade.Sprite {
       this.setTexture("dirtTile");
       this.setFrame(0);
     } else {
-      // Map plantType codes to their respective textures
-      const plantTextureMap: { [key: number]: string } = {
+      const plantTexture = {
         1: "grass",
         2: "flower",
         3: "shrub",
-      };
-  
-      const plantTexture = plantTextureMap[plantType];
+      }[plantType];
+
       if (!this.plant) {
-        this.plant = this.scene.add.sprite(this.x, this.y, plantTexture);
+        this.plant = this.scene.add.sprite(this.x, this.y, plantTexture as string);
         this.plant.setDepth(this.depth + 1);
       }
       this.plant.anims.play(`${growthLevel}-${plantTexture}`, true);

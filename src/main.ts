@@ -1,37 +1,34 @@
 "use strict";
 import Phaser from 'phaser';
-import PlayScene from "./scenes/PlayScene.ts";
-import PreloadScene from "./scenes/PreloadScene.ts";
+import PlayScene from "./scenes/PlayScene.js";
+import PreloadScene from "./scenes/PreloadScene.js";
 
 const WIDTH = 480;
 const HEIGHT = 480;
 
-const SHARED_CONFIG = {
-  width: WIDTH,
-  height: HEIGHT,
-};
-
-const Scenes = [PreloadScene, PlayScene];
-
-const createScene = (Scene: Phaser.Scene) => new Scene(SHARED_CONFIG);
-// iterates over all the scenes, and creating a new instance of that scene with SHARED_CONFIG
-const initScenes = () => Scenes.map(createScene);
-
 const config = {
+  //parent: 'gameView',
   type: Phaser.AUTO,
-  ...SHARED_CONFIG,
   render: {
-    pixelArt: true,
+      pixelArt: true
   },
   physics: {
-    default: "arcade",
-    arcade: {
-      debug: true,
-    },
+      default: 'arcade',
+      arcade: {
+          //debug: true,
+          //gravity: { y: 1000 }
+      }
   },
-  scene: initScenes(),
-};
+  width: WIDTH,
+  height: HEIGHT,
+  scale: {
+      mode: Phaser.Scale.FIT,
+      autoCenter: Phaser.Scale.CENTER_BOTH
+  },
+  scene: [PreloadScene, PlayScene]
+}
 
 export const game = new Phaser.Game(config);
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const { height, width } = game.config;

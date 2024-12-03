@@ -2,13 +2,14 @@
   "name": "cmpm121-final-project",
   "version": "1.0.0",
   "description": "## Devlog Entry Intro - 11/14/2024",
-  "main": "index.js",
+  "main": "./dist/index.js",
+  "type": "module",
   "directories": {
     "lib": "es2017"
   },
   "scripts": {
-    "build": "tsc",
-    "start": "serve ./dist"
+    "dev": "vite",
+    "build": "vite build"
   },
   "keywords": [],
   "author": "",

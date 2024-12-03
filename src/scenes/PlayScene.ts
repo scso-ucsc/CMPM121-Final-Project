@@ -1,23 +1,33 @@
 import Phaser from 'phaser';
-import ScenarioParser, { Result, EventDay, NonEventSection } from "../utils/ScenarioParser2.ts";
+import ScenarioParser, { EventDay, NonEventSection } from "../utils/ScenarioParser.js";
 import { plantDefinitions } from "../utils/PlantDefinitions.js";
 import Cell from "../prefabs/Cell.js";
-import { Player, StateMachine } from "../prefabs/Player.ts"
-import { game } from "../main.ts"
+import { Player, StateMachine } from "../prefabs/Player.js"
+import { game } from "../main.js"
+
+interface gameState {
+  day: number,
+  sunLevel: number,
+  waterLevel: number,
+  playerSeedChoice: string,
+  gridState: number[], // Convert Uint8Array to array for JSON compatibility
+  undoStack: string[], // Serialize each state
+  redoStack: string[], // Serialize each state
+}
 
 class PlayScene extends Phaser.Scene {
   day: number = 1;
   sunLevel: number = 0
   waterLevel: number = 0;
   waterMultiplier: number = 1;
-  playerSeedChoice: string = "grass";
+  playerSeedChoice: "grass" | "flower" | "shrub" = "grass";
   textdepth: number = 11;
   playerdepth: number = 10;
   victoryConditions: NonEventSection = {};
   weatherPolicy: NonEventSection = {};
   eventsQueue: EventDay[] = [];
-  undoStack = [];
-  redoStack = [];
+  undoStack: gameState[] = [];
+  redoStack: gameState[] = [];
   playerFSM: StateMachine | null = null;
   player: Player | null = null;
 
@@ -34,16 +44,25 @@ class PlayScene extends Phaser.Scene {
 
   //plant and grid variables
   bytesPerCell: number = 3;
-  cellGroup = this.add.group();
+  cellGroup = this.add.group({
+    classType: Cell,
+  });
   gridWidth: number = 15;
   gridHeight: number = 15;
   gridState: Uint8Array = new Uint8Array(this.gridWidth * this.gridHeight * this.bytesPerCell);
+  cellGrid: Cell[][] | null = null;
 
   //text variables
   dayText: Phaser.GameObjects.Text | null = null;
   sunLevelText: Phaser.GameObjects.Text | null = null;
   waterLevelText: Phaser.GameObjects.Text | null = null;
   seedChoiceText: Phaser.GameObjects.Text | null = null;
+  saveButton1: Phaser.GameObjects.Text | null = null;
+  saveButton2: Phaser.GameObjects.Text | null = null;
+  saveButton3: Phaser.GameObjects.Text | null = null;
+  loadButton1: Phaser.GameObjects.Text | null = null;
+  loadButton2: Phaser.GameObjects.Text | null = null;
+  loadButton3: Phaser.GameObjects.Text | null = null;
 
   //player variables
   playerSowTargetBox: Phaser.GameObjects.Sprite | null = null;
@@ -78,7 +97,7 @@ class PlayScene extends Phaser.Scene {
         this.day = scenario.StartingConditions.Day as number;
         this.sunLevel = scenario.StartingConditions.SunLevel as number;
         this.waterLevel = scenario.StartingConditions.WaterLevel as number;
-        this.playerSeedChoice = scenario.StartingConditions.PlayerSeedChoice as string;
+        this.playerSeedChoice = scenario.StartingConditions.PlayerSeedChoice as "grass" | "shrub" | "flower";
 
         this.victoryConditions = scenario.VictoryConditions as NonEventSection;
         this.weatherPolicy = scenario.WeatherPolicy as NonEventSection;
@@ -130,7 +149,7 @@ class PlayScene extends Phaser.Scene {
 
     const event = this.eventsQueue.find((e) => e.day === this.day);
     if (event) {
-      if (event.SunRange) this.weatherPolicy.SunRange = event.SunRange;
+      if (event.SunRange) this.weatherPolicy.SunRange = event.SunRange as number[];
       if (event.WaterRange) this.weatherPolicy.WaterRange = event.WaterRange;
       if (event.WaterMultiplier) this.waterMultiplier = event.WaterMultiplier as number;
       if (event.Message) alert(event.Message);
@@ -193,7 +212,9 @@ class PlayScene extends Phaser.Scene {
   createGrid() {
     const cellSize = 32;
 
-    this.cellGroup = this.add.group();
+    this.cellGroup = this.add.group({
+      classType: Cell,
+    });
     this.gridWidth = 15;
     this.gridHeight = 15;
     //For each cell: plantType, waterLevel, growthLevel
@@ -214,8 +235,8 @@ class PlayScene extends Phaser.Scene {
         //now create Cell prefab
         const x = col * cellSize + cellSize / 2;
         const y = row * cellSize + cellSize / 2;
-        const cell = new Cell(this, x, y, "dirtTile", row, col);
-        this.cellGroup.add(cell);
+        //const cell = new Cell(this, x, y, "dirtTile", row, col);
+        this.cellGroup.add(new Cell(this, x, y, "dirtTile", row, col));
       }
     }
   }
@@ -273,8 +294,8 @@ class PlayScene extends Phaser.Scene {
 
   createPlayer() {
     this.player = new Player(this, 100, 100, "character", 0, "down");
-    this.playerSowTargetBox = this.physics.add.sprite(-10, -10).setSize(1, 1); //TargetBoxes starts off screen
-    this.playerReapTargetBox = this.physics.add.sprite(-10, -10).setSize(1, 1);
+    this.playerSowTargetBox = this.physics.add.sprite(-10, -10, "").setSize(1, 1); //TargetBoxes starts off screen
+    this.playerReapTargetBox = this.physics.add.sprite(-10, -10, "").setSize(1, 1);
     this.player.setDepth(this.playerdepth);
   }
 
@@ -284,7 +305,9 @@ class PlayScene extends Phaser.Scene {
       this.cellGroup,
       this.playerSowTargetBox as Phaser.GameObjects.Sprite,
       (cell) => {
-        cell.sowCell(this.playerSeedChoice);
+        if (cell instanceof Cell) {
+          cell.sowCell(this.playerSeedChoice);
+        }
       }
     );
 
@@ -293,7 +316,11 @@ class PlayScene extends Phaser.Scene {
       this.cellGroup,
       this.playerReapTargetBox as Phaser.GameObjects.Sprite,
       (cell) => {
-        cell.reapCell();
+        if(cell instanceof Cell) {
+          cell.reapCell();
+        } else {
+          console.log("Cell Group not Cell!")
+        }
       }
     );
   }
@@ -310,7 +337,7 @@ class PlayScene extends Phaser.Scene {
   createSaveButton(yOffset: number, slotNumber: number) {
     const saveButton = this.add
       .text(10, 400 + yOffset, `Save Slot ${slotNumber.toString()}`, {
-        fill: "#ffffff",
+        color: "#ffffff",
       })
       .setInteractive()
       .on("pointerdown", () => this.saveGame(slotNumber));
@@ -320,7 +347,7 @@ class PlayScene extends Phaser.Scene {
   createLoadButton(yOffset: number, slotNumber: number) {
     const loadButton = this.add
       .text(360, 400 + yOffset, `Load Slot ${slotNumber.toString()}`, {
-        fill: "#ffffff",
+        color: "#ffffff",
       })
       .setInteractive()
       .on("pointerdown", () => this.loadGame(slotNumber));
@@ -328,8 +355,8 @@ class PlayScene extends Phaser.Scene {
   }
 
   generateWeather() {
-    const [sunMin, sunMax] = this.weatherPolicy.SunRange;
-    const [waterMin, waterMax] = this.weatherPolicy.WaterRange;
+    const [sunMin, sunMax] = this.weatherPolicy.SunRange as number[];
+    const [waterMin, waterMax] = this.weatherPolicy.WaterRange as number[];
 
     this.sunLevel = Math.floor(Math.random() * (sunMax - sunMin + 1)) + sunMin;
     this.waterLevel =
@@ -347,7 +374,7 @@ class PlayScene extends Phaser.Scene {
     );
   }
 
-  updateSeedChoice(seedChoice: string) {
+  updateSeedChoice(seedChoice: "grass" | "flower" | "shrub") {
     this.pushUndoState();
     console.log("Now planting " + seedChoice);
 
@@ -357,21 +384,25 @@ class PlayScene extends Phaser.Scene {
   }
 
   updateGrid() {
-    this.cellGroup.getChildren().forEach((cell: { row: any; col: any; checkCellGrowth: () => void; }) => {
-      const row = cell.row;
-      const col = cell.col;
+    this.cellGroup.getChildren().forEach((cell) => {
+      if(cell instanceof Cell) {  
+        const row = cell.row;
+        const col = cell.col;
 
-      //Check if planted first
-      if (this.getPlantType(row, col) !== 0) {
-        cell.checkCellGrowth();
+        //Check if planted first
+        if (this.getPlantType(row, col) !== 0) {
+          cell.checkCellGrowth();
+        }
+
+        //then add water to cell
+        this.setWaterLevel(
+          row,
+          col,
+          this.getWaterLevel(row, col) + this.waterLevel
+        );
+      } else {
+        console.log("Cell Group not Cell!")
       }
-
-      //then add water to cell
-      this.setWaterLevel(
-        row,
-        col,
-        this.getWaterLevel(row, col) + this.waterLevel
-      );
     });
   }
 
@@ -405,8 +436,8 @@ class PlayScene extends Phaser.Scene {
   }
 
   //Save-Load Implementation
-  saveGame(slot: any) {
-    const gameData = {
+  saveGame(slot: number) {
+    const gameData: gameState = {
       day: this.day,
       sunLevel: this.sunLevel,
       waterLevel: this.waterLevel,
@@ -421,9 +452,9 @@ class PlayScene extends Phaser.Scene {
     alert(`Game Saved to Slot ${slot}`);
   }
 
-  loadGame(slot: any) {
+  loadGame(slot: number) {
     const key = `saveSlot${slot}`;
-    const savedData = JSON.parse(localStorage.getItem(key));
+    const savedData = JSON.parse(localStorage.getItem(key) as string);
 
     if (!savedData) {
       alert(`No saved data found in slot ${slot}`);
@@ -446,26 +477,30 @@ class PlayScene extends Phaser.Scene {
     );
 
     this.updateUI();
-    this.cellGroup.getChildren().forEach((cell: { row: any; col: any; updateSprite: (arg0: any, arg1: any) => void; }) => {
-      const row = cell.row;
-      const col = cell.col;
-      const plantType = this.getPlantType(row, col);
-      const growthLevel = this.getGrowthLevel(row, col);
-      cell.updateSprite(plantType, growthLevel);
+    this.cellGroup.getChildren().forEach((cell) => {
+      if(cell instanceof Cell) {  
+        const row = cell.row;
+        const col = cell.col;
+        const plantType = this.getPlantType(row, col);
+        const growthLevel = this.getGrowthLevel(row, col);
+        cell.updateSprite(plantType, growthLevel);
+      } else {
+        console.log("Cell Group not Cell!")
+      }
     });
 
     alert(`Game Loaded from Slot ${slot}`);
   }
 
   autoSave() {
-    const gameData = {
+    const gameData: gameState = {
       day: this.day,
       sunLevel: this.sunLevel,
       waterLevel: this.waterLevel,
       playerSeedChoice: this.playerSeedChoice,
       gridState: Array.from(this.gridState), // Converted into a regular array for JSON compatibility
-      undoStack: this.undoStack, // Save undo stack
-      redoStack: this.redoStack, // Save redo stack
+      undoStack: this.undoStack.map((state) => JSON.stringify(state)), // Serialize each state
+      redoStack: this.redoStack.map((state) => JSON.stringify(state)), // Serialize each state
     };
 
     // Save to local storage
@@ -476,7 +511,7 @@ class PlayScene extends Phaser.Scene {
 
   loadAutoSave() {
     const key = `autoSave`;
-    const savedData = JSON.parse(localStorage.getItem(key));
+    const savedData = JSON.parse(localStorage.getItem(key) as string);
 
     if (!savedData) {
       alert(`No autosave detected`);
@@ -496,14 +531,18 @@ class PlayScene extends Phaser.Scene {
 
     // Update the UI and cells
     this.updateUI();
-    this.cellGroup.getChildren().forEach((cell: { row: any; col: any; updateSprite: (arg0: any, arg1: any) => void; }) => {
-      const row = cell.row;
-      const col = cell.col;
+    this.cellGroup.getChildren().forEach((cell) => {
+      if(cell instanceof Cell) {  
+        const row = cell.row;
+        const col = cell.col;
 
-      const plantType = this.getPlantType(row, col);
-      const growthLevel = this.getGrowthLevel(row, col);
+        const plantType = this.getPlantType(row, col);
+        const growthLevel = this.getGrowthLevel(row, col);
 
-      cell.updateSprite(plantType, growthLevel);
+        cell.updateSprite(plantType, growthLevel);
+      } else {
+        console.log("Cell Group not Cell!")
+      }
     });
 
     console.log(`Autosave Loaded Successfully`);
@@ -512,7 +551,7 @@ class PlayScene extends Phaser.Scene {
     window.addEventListener("beforeunload", () => {
       this.autoSave();
     });
-    const savedData = JSON.parse(localStorage.getItem("autoSave"));
+    const savedData = JSON.parse(localStorage.getItem("autoSave") as string);
     if (savedData) {
       const userChoice = window.confirm(
         "Do you want to load from the autosave? (Click Cancel for to clear the autosave)"
@@ -534,7 +573,7 @@ class PlayScene extends Phaser.Scene {
       playerSeedChoice: this.playerSeedChoice,
       gridState: Array.from(this.gridState), //Copy the grid state
     };
-    this.undoStack.push(currentState);
+    this.undoStack.push(currentState as gameState);
     this.redoStack = []; //Clear redo stack on new action
   }
 
@@ -547,7 +586,7 @@ class PlayScene extends Phaser.Scene {
         waterLevel: this.waterLevel,
         playerSeedChoice: this.playerSeedChoice,
         gridState: Array.from(this.gridState), //Convert to JSON-compatible format
-      });
+      } as gameState);
 
       //Restore state from undo stack
       const previousState = this.undoStack.pop();
@@ -555,20 +594,24 @@ class PlayScene extends Phaser.Scene {
         this.day = previousState.day;
         this.sunLevel = previousState.sunLevel;
         this.waterLevel = previousState.waterLevel;
-        this.playerSeedChoice = previousState.playerSeedChoice;
+        this.playerSeedChoice = previousState.playerSeedChoice as "grass" | "flower" | "shrub";
         this.gridState = new Uint8Array(previousState.gridState); //Convert back to Uint8Array
       }
 
       //Update UI and grid
       this.updateUI();
-      this.cellGroup.getChildren().forEach((cell: { row: any; col: any; updateSprite: (arg0: any, arg1: any) => void; }) => {
-        const row = cell.row;
-        const col = cell.col;
+      this.cellGroup.getChildren().forEach((cell) => {
+        if(cell instanceof Cell) {
+          const row = cell.row;
+          const col = cell.col;
 
-        const plantType = this.getPlantType(row, col);
-        const growthLevel = this.getGrowthLevel(row, col);
+          const plantType = this.getPlantType(row, col);
+          const growthLevel = this.getGrowthLevel(row, col);
 
-        cell.updateSprite(plantType, growthLevel);
+          cell.updateSprite(plantType, growthLevel);
+        } else {
+          console.log("Cell Group not Cell!")
+        }
       });
     } else {
       alert("No more actions to undo!");
@@ -590,26 +633,30 @@ class PlayScene extends Phaser.Scene {
       gridState: Array.from(this.gridState),
     };
 
-    this.undoStack.push(currentState); //Save current state to undo stack
+    this.undoStack.push(currentState as gameState); //Save current state to undo stack
     this.restoreState(nextState);
   }
 
   restoreState(state: { day: number; sunLevel: number; waterLevel: number; playerSeedChoice: string; gridState: Iterable<number>; } | undefined) {
-    this.day = state.day;
-    this.sunLevel = state.sunLevel;
-    this.waterLevel = state.waterLevel;
-    this.playerSeedChoice = state.playerSeedChoice;
-    this.gridState = new Uint8Array(state.gridState); //Restore grid state
+    if(state){
+      this.day = state.day;
+      this.sunLevel = state.sunLevel;
+      this.waterLevel = state.waterLevel;
+      this.playerSeedChoice = state.playerSeedChoice as "grass" | "flower" | "shrub";
+      this.gridState = new Uint8Array(state.gridState); //Restore grid state
+    }
 
     this.updateUI();
-    this.cellGroup.getChildren().forEach((cell: { row: any; col: any; updateSprite: (arg0: any, arg1: any) => void; }) => {
-      const row = cell.row;
-      const col = cell.col;
-
-      const plantType = this.getPlantType(row, col);
-      const growthLevel = this.getGrowthLevel(row, col);
-
-      cell.updateSprite(plantType, growthLevel);
+    this.cellGroup.getChildren().forEach((cell) => {
+      if(cell instanceof Cell) {
+        const row = cell.row;
+        const col = cell.col;
+        const plantType = this.getPlantType(row, col);
+        const growthLevel = this.getGrowthLevel(row, col);
+        cell.updateSprite(plantType, growthLevel);
+      } else {
+        console.log("Cell Group not Cell!")
+      }
     });
 
     console.log("State restored successfully.");
@@ -630,7 +677,7 @@ class PlayScene extends Phaser.Scene {
       JSON.stringify(this.undoStack[this.undoStack.length - 1]) !==
         JSON.stringify(currentState)
     ) {
-      this.undoStack.push(currentState);
+      this.undoStack.push(currentState as gameState);
     }
 
     //Limit the size of the undo stack (optional)
