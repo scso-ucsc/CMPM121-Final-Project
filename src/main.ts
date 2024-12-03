@@ -1,10 +1,11 @@
 "use strict";
 import Phaser from 'phaser';
-import PlayScene from "./scenes/PlayScene.js";
-import PreloadScene from "./scenes/PreloadScene.js";
+import PlayScene from "./scenes/PlayScene";
+import PreloadScene from "./scenes/PreloadScene";
 
 const WIDTH = 480;
 const HEIGHT = 480;
+
 
 const config = {
   //parent: 'gameView',

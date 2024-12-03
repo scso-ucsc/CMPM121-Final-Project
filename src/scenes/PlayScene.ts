@@ -1,9 +1,9 @@
-import Phaser from 'phaser';
-import ScenarioParser, { EventDay, NonEventSection } from "../utils/ScenarioParser.js";
-import { plantDefinitions } from "../utils/PlantDefinitions.js";
-import Cell from "../prefabs/Cell.js";
-import { Player, StateMachine } from "../prefabs/Player.js"
-import { game } from "../main.js"
+import Phaser from "phaser";
+import ScenarioParser, { EventDay, NonEventSection } from "../utils/ScenarioParser";
+import { plantDefinitions } from "../utils/PlantDefinitions";
+import Cell from "../prefabs/Cell";
+import { Player, StateMachine } from "../prefabs/Player"
+import { game } from "../main"
 
 interface gameState {
   day: number,
@@ -44,9 +44,7 @@ class PlayScene extends Phaser.Scene {
 
   //plant and grid variables
   bytesPerCell: number = 3;
-  cellGroup = this.add.group({
-    classType: Cell,
-  });
+  cellGroup: Phaser.GameObjects.Group | null = null;
   gridWidth: number = 15;
   gridHeight: number = 15;
   gridState: Uint8Array = new Uint8Array(this.gridWidth * this.gridHeight * this.bytesPerCell);
@@ -301,28 +299,29 @@ class PlayScene extends Phaser.Scene {
 
   createInteractions() {
     //sowing
-    this.physics.add.overlap(
-      this.cellGroup,
-      this.playerSowTargetBox as Phaser.GameObjects.Sprite,
-      (cell) => {
-        if (cell instanceof Cell) {
-          cell.sowCell(this.playerSeedChoice);
+    if(this.cellGroup) {
+      this.physics.add.overlap(
+        this.cellGroup,
+        this.playerSowTargetBox as Phaser.GameObjects.Sprite,
+        (cell) => {
+          if (cell instanceof Cell) {
+            cell.sowCell(this.playerSeedChoice);
+          }
         }
-      }
-    );
-
-    //reaping
-    this.physics.add.overlap(
-      this.cellGroup,
-      this.playerReapTargetBox as Phaser.GameObjects.Sprite,
-      (cell) => {
-        if(cell instanceof Cell) {
-          cell.reapCell();
-        } else {
-          console.log("Cell Group not Cell!")
+      );
+      //reaping
+      this.physics.add.overlap(
+        this.cellGroup,
+        this.playerReapTargetBox as Phaser.GameObjects.Sprite,
+        (cell) => {
+          if(cell instanceof Cell) {
+            cell.reapCell();
+          } else {
+            console.log("Cell Group not Cell!")
+          }
         }
-      }
-    );
+      );
+    }
   }
 
   createSaveLoadUI() {
@@ -384,7 +383,7 @@ class PlayScene extends Phaser.Scene {
   }
 
   updateGrid() {
-    this.cellGroup.getChildren().forEach((cell) => {
+    (this.cellGroup as Phaser.GameObjects.Group).getChildren().forEach((cell) => {
       if(cell instanceof Cell) {  
         const row = cell.row;
         const col = cell.col;
@@ -477,7 +476,7 @@ class PlayScene extends Phaser.Scene {
     );
 
     this.updateUI();
-    this.cellGroup.getChildren().forEach((cell) => {
+    (this.cellGroup as Phaser.GameObjects.Group).getChildren().forEach((cell) => {
       if(cell instanceof Cell) {  
         const row = cell.row;
         const col = cell.col;
@@ -531,7 +530,7 @@ class PlayScene extends Phaser.Scene {
 
     // Update the UI and cells
     this.updateUI();
-    this.cellGroup.getChildren().forEach((cell) => {
+    (this.cellGroup as Phaser.GameObjects.Group).getChildren().forEach((cell) => {
       if(cell instanceof Cell) {  
         const row = cell.row;
         const col = cell.col;
@@ -600,7 +599,7 @@ class PlayScene extends Phaser.Scene {
 
       //Update UI and grid
       this.updateUI();
-      this.cellGroup.getChildren().forEach((cell) => {
+      (this.cellGroup as Phaser.GameObjects.Group).getChildren().forEach((cell) => {
         if(cell instanceof Cell) {
           const row = cell.row;
           const col = cell.col;
@@ -647,7 +646,7 @@ class PlayScene extends Phaser.Scene {
     }
 
     this.updateUI();
-    this.cellGroup.getChildren().forEach((cell) => {
+    (this.cellGroup as Phaser.GameObjects.Group).getChildren().forEach((cell) => {
       if(cell instanceof Cell) {
         const row = cell.row;
         const col = cell.col;
