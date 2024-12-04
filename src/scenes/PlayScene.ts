@@ -3,7 +3,10 @@ import ScenarioParser, { EventDay, NonEventSection } from "../utils/ScenarioPars
 import { plantDefinitions } from "../utils/PlantDefinitions";
 import Cell from "../prefabs/Cell";
 import { Player, StateMachine } from "../prefabs/Player"
-import { game } from "../main"
+
+
+const gamewidth: number = 480;
+const gameheight: number = 480;
 
 interface gameState {
   day: number,
@@ -242,8 +245,8 @@ class PlayScene extends Phaser.Scene {
   createUI() {
     this.dayText = this.add
       .text(
-        (game.config.width as number) / 2,
-        (game.config.height as number) / 10,
+        (gamewidth as number) / 2,
+        (gameheight as number) / 10,
         `Day: ${this.day}`,
         {
           fontSize: "24px",
@@ -255,8 +258,8 @@ class PlayScene extends Phaser.Scene {
 
     this.sunLevelText = this.add
       .text(
-        game.config.width as number / 2,
-        (game.config.height as number / 10) * 1.5,
+        gamewidth as number / 2,
+        (gameheight as number / 10) * 1.5,
         `Sun Level: ${this.sunLevel}`,
         {
           fontSize: "18px",
@@ -268,8 +271,8 @@ class PlayScene extends Phaser.Scene {
 
     this.waterLevelText = this.add
       .text(
-        game.config.width as number / 2,
-        (game.config.height as number / 10) * 2,
+        gamewidth as number / 2,
+        (gameheight as number / 10) * 2,
         `Water Level: ${this.waterLevel}`,
         {
           fontSize: "18px",
@@ -281,8 +284,8 @@ class PlayScene extends Phaser.Scene {
 
     this.seedChoiceText = this.add
       .text(
-        game.config.width as number / 2,
-        (game.config.height as number / 10) * 2.5,
+        gamewidth as number / 2,
+        (gameheight as number / 10) * 2.5,
         `Seed Choice: ${this.playerSeedChoice}`,
         { fontSize: "18px", color: "#ffffff" }
       )

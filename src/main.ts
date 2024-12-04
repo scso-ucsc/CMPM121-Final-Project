@@ -1,7 +1,7 @@
 "use strict";
 import Phaser from 'phaser';
-import PlayScene from "./scenes/PlayScene";
 import PreloadScene from "./scenes/PreloadScene";
+import PlayScene from "./scenes/PlayScene";
 
 const WIDTH = 480;
 const HEIGHT = 480;
