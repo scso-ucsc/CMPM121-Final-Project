@@ -40,7 +40,6 @@ class Cell extends Phaser.Physics.Arcade.Sprite {
       this.parentScene.recordState();
       this.parentScene.setPlantType(this.row, this.col, plantTypeCode);
       this.parentScene.setGrowthLevel(this.row, this.col, 0);
-      console.log(`Planted ${plantType} at (${this.row}, ${this.col})`);
       this.plant = this.scene.add.sprite(this.x, this.y, plantType);
       this.plant.anims.play(`sow-${plantType}`, true);
     }
@@ -51,7 +50,6 @@ class Cell extends Phaser.Physics.Arcade.Sprite {
       this.parentScene.recordState();
       this.parentScene.setPlantType(this.row, this.col, 0);
       this.parentScene.setGrowthLevel(this.row, this.col, 0);
-      console.log(`Reaping plant at (${this.row}, ${this.col})`);
       if (this.plant) {
         this.plant.destroy();
         this.plant = null;
@@ -126,11 +124,11 @@ class Cell extends Phaser.Physics.Arcade.Sprite {
   }
 
   growPlant(
-    plantType: "grass" | "flower" | "shrub",
+    plantType: string,
     growthLevel: number,
     waterLevel: number,
     waterRequirement: number
-  ): void {
+  ) {
     if (growthLevel < 3) {
       growthLevel++;
       this.scene.setGrowthLevel(this.row, this.col, growthLevel);
@@ -146,12 +144,6 @@ class Cell extends Phaser.Physics.Arcade.Sprite {
       if (this.plant) {
         this.plant.anims.play(`${growthLevel}-${plantType}`, true);
       }
-    } else {
-      console.log(
-        `${plantType.charAt(0).toUpperCase() + plantType.slice(1)} at (${
-          this.row
-        }, ${this.col}) is already fully grown.`
-      );
     }
   }
 
