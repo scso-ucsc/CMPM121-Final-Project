@@ -119,7 +119,7 @@ When the game checks to see if a plant can grow in the checkCellGrowth function,
 ### Switch to Alternate Platform
 For this project, our switch to an alternate platform involved retaining Phaser3 as our main platform but transitioning from the JavaScript language into the TypeScript one. This involved renaming our JavaScript files (.js) into TypeScript ones (.ts) and manually updating the code of each JavaScript file. In order to preserve what we had originally implemented, I created a new branch called TypeScriptConversion on our repository and implemented these changes there. With each JavaScript file, we then had to define our inputs and outputs for various function which involved the introduction of new and unique type variables, as well as updating the JavaScript syntax into TypeScript. A tsconfig.json file was also added to enable and configure TypeScript compilation.
 
-## Reflection
+### Reflection
 With the addition of our External and Internal DSLs, the way in which we implemented certain aspects of our F0 requirements were changed, specifically in terms of how our water and sunlight variables are calculated and when certain events occur. This addition has also resulted in us adjusting the way in which we provide variables to our play scene as now all of these values can be defined in our defaultScenario.txt file instead of the play scene itself. The implementation of our internal DSL has also enabled us to properly inform our players what seed choice they current have selected, which includes displaying a simple emoji icon. Furthermore, the addition of the external DSL has allowed us to create events that occur at certain days of the game, allowing for a more unique experience throughout gameplay. That being said, now that our project has switched to using TypeScript instead of JavaScript, not much has changed aside from needing to define new type annotations, replacing file extensions, and updating the syntax. That being said, the way in which certain functions are written needed to be significantly adjusted to meet the TypeScript language's demands so that everything may run like it did before. Our roles have mostly stayed the same from the last devlog, though each of us did work together in order to determine how to convert our project into using TypeScript.
 
 ## Devlog Entry 3 - 12/6/2024
@@ -136,4 +136,4 @@ With the addition of our External and Internal DSLs, the way in which we impleme
 
 ### Mobile Play (Offline)
 
-## Reflection
+### Reflection
