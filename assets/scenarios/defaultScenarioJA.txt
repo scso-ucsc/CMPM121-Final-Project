@@ -2,7 +2,7 @@
 Day = 1
 SunLevel = 5
 WaterLevel = 3
-PlayerSeedChoice = "草"  
+PlayerSeedChoice = "grass"  
 
 [WeatherPolicy]
 SunRange = [3, 10]

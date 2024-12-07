@@ -101,7 +101,7 @@ class PlayScene extends Phaser.Scene {
     this.createPlayer();
 
     //Loading External DSL and applying data
-    this.loadScenario("assets/scenarios/defaultScenario.txt").then(
+    this.loadScenario(`assets/scenarios/defaultScenario${this.localLang.getCurrentLanguage().toUpperCase()}.txt`).then(
       (scenario) => {
         this.day = scenario.StartingConditions.Day as number;
         this.sunLevel = scenario.StartingConditions.SunLevel as number;
