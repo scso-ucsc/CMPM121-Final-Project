@@ -131,10 +131,10 @@ class Cell extends Phaser.Physics.Arcade.Sprite {
   ) {
     if (growthLevel < 3) {
       growthLevel++;
-      this.scene.setGrowthLevel(this.row, this.col, growthLevel);
+      (this.scene as any).setGrowthLevel(this.row, this.col, growthLevel);
 
       // update water level
-      this.scene.setWaterLevel(
+      (this.scene as any).setWaterLevel(
         this.row,
         this.col,
         waterLevel - waterRequirement
