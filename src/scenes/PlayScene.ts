@@ -6,6 +6,7 @@ import ScenarioParser, {
 import { plantDefinitions } from "../utils/PlantDefinitions";
 import Cell from "../prefabs/Cell";
 import { Player, StateMachine } from "../prefabs/Player";
+import { LocalizationManager, localLang } from "./PreloadScene";
 
 const gamewidth: number = 480;
 const gameheight: number = 480;
@@ -72,6 +73,9 @@ class PlayScene extends Phaser.Scene {
   //player variables
   playerSowTargetBox: Phaser.GameObjects.Sprite | null = null;
   playerReapTargetBox: Phaser.GameObjects.Sprite | null = null;
+
+  //localization manager
+  localLang: LocalizationManager = localLang;
 
   constructor() {
     super("PlayScene");
@@ -267,7 +271,7 @@ class PlayScene extends Phaser.Scene {
       .text(
         (gamewidth as number) / 2,
         (gameheight as number) / 10,
-        `Day: ${this.day}`,
+        `${this.localLang.getTranslation("ui.day")}${this.day}`,
         {
           fontSize: "24px",
           color: "#ffffff",
@@ -280,7 +284,7 @@ class PlayScene extends Phaser.Scene {
       .text(
         (gamewidth as number) / 2,
         ((gameheight as number) / 10) * 1.5,
-        `Sun Level: ${this.sunLevel}`,
+        `${this.localLang.getTranslation("ui.sun")}${this.sunLevel}`,
         {
           fontSize: "18px",
           color: "#ffffff",
@@ -293,7 +297,7 @@ class PlayScene extends Phaser.Scene {
       .text(
         (gamewidth as number) / 2,
         ((gameheight as number) / 10) * 2,
-        `Water Level: ${this.waterLevel}`,
+        `${this.localLang.getTranslation("ui.water")}${this.waterLevel}`,
         {
           fontSize: "18px",
           color: "#ffffff",
@@ -306,7 +310,7 @@ class PlayScene extends Phaser.Scene {
       .text(
         (gamewidth as number) / 2,
         ((gameheight as number) / 10) * 2.5,
-        `Seed Choice: ${this.playerSeedChoice}`,
+        `${this.localLang.getTranslation("ui.seed")}${this.localLang.getTranslation("ui." + this.playerSeedChoice)}`,
         { fontSize: "18px", color: "#ffffff" }
       )
       .setOrigin(0.5, 0.5);
@@ -362,7 +366,7 @@ class PlayScene extends Phaser.Scene {
 
   createSaveButton(yOffset: number, slotNumber: number) {
     const saveButton = this.add
-      .text(10, 400 + yOffset, `Save Slot ${slotNumber.toString()}`, {
+      .text(10, 400 + yOffset, `${this.localLang.getTranslation("ui.save_slot")}${slotNumber.toString()}`, {
         color: "#ffffff",
       })
       .setInteractive()
@@ -372,7 +376,7 @@ class PlayScene extends Phaser.Scene {
 
   createLoadButton(yOffset: number, slotNumber: number) {
     const loadButton = this.add
-      .text(360, 400 + yOffset, `Load Slot ${slotNumber.toString()}`, {
+      .text(360, 400 + yOffset, `${this.localLang.getTranslation("ui.load_slot")}${slotNumber.toString()}`, {
         color: "#ffffff",
       })
       .setInteractive()
@@ -392,15 +396,15 @@ class PlayScene extends Phaser.Scene {
 
   updateUI() {
     const seedIcon = this.getPlantIcon(this.playerSeedChoice);
-    (this.dayText as Phaser.GameObjects.Text).setText(`Day: ${this.day}`);
+    (this.dayText as Phaser.GameObjects.Text).setText(`${this.localLang.getTranslation("ui.day")}${this.day}`);
     (this.sunLevelText as Phaser.GameObjects.Text).setText(
-      `Sun Level: ${this.sunLevel}`
+      `${this.localLang.getTranslation("ui.sun")}${this.sunLevel}`
     );
     (this.waterLevelText as Phaser.GameObjects.Text).setText(
-      `Water Level: ${this.waterLevel}`
+      `${this.localLang.getTranslation("ui.water")}${this.waterLevel}`
     );
     (this.seedChoiceText as Phaser.GameObjects.Text).setText(
-      `Seed Choice: ${seedIcon} ${this.playerSeedChoice}`
+      `${this.localLang.getTranslation("ui.seed")}${seedIcon} ${this.localLang.getTranslation("ui." + this.playerSeedChoice)}`
     );
   }
 
@@ -409,7 +413,7 @@ class PlayScene extends Phaser.Scene {
 
     const seedIcon = this.getPlantIcon(seedChoice);
     (this.seedChoiceText as Phaser.GameObjects.Text).setText(
-      `Seed Choice: ${seedIcon} ${seedChoice}`
+      `${this.localLang.getTranslation("ui.seed")}${seedIcon} ${this.localLang.getTranslation("ui." + seedChoice)}`
     );
     this.playerSeedChoice = seedChoice;
   }
@@ -465,9 +469,9 @@ class PlayScene extends Phaser.Scene {
 
   gameOver(outcome: string) {
     if (outcome === "lose") {
-      alert("End Condition Not Met: You Lose!");
+      alert(`${this.localLang.getTranslation("alerts.lost")}`);
     } else {
-      alert("End Condition Met: You Win!");
+      alert(`${this.localLang.getTranslation("alerts.won")}`);
     }
   }
 
@@ -485,7 +489,7 @@ class PlayScene extends Phaser.Scene {
 
     const key = `saveSlot${slot}`;
     localStorage.setItem(key, JSON.stringify(gameData));
-    alert(`Game Saved to Slot ${slot}`);
+    alert(`${this.localLang.getTranslation("alerts.saved")}${slot}`);
   }
 
   loadGame(slot: number) {
@@ -493,7 +497,7 @@ class PlayScene extends Phaser.Scene {
     const savedData = JSON.parse(localStorage.getItem(key) as string);
 
     if (!savedData) {
-      alert(`No saved data found in slot ${slot}`);
+      alert(`${this.localLang.getTranslation("alerts.no_save")}${slot}`);
       return;
     }
 
@@ -527,7 +531,7 @@ class PlayScene extends Phaser.Scene {
         }
       });
 
-    alert(`Game Loaded from Slot ${slot}`);
+    alert(`${this.localLang.getTranslation("alerts.loaded")}${slot}`);
   }
 
   autoSave() {
@@ -551,7 +555,7 @@ class PlayScene extends Phaser.Scene {
     const savedData = JSON.parse(localStorage.getItem(key) as string);
 
     if (!savedData) {
-      alert(`No autosave detected`);
+      alert(`${this.localLang.getTranslation("alerts.no_auto")}`);
       return;
     }
 
@@ -591,7 +595,7 @@ class PlayScene extends Phaser.Scene {
     const savedData = JSON.parse(localStorage.getItem("autoSave") as string);
     if (savedData) {
       const userChoice = window.confirm(
-        "Do you want to load from the autosave? (Click Cancel for to clear the autosave)"
+        `${this.localLang.getTranslation("alerts.autosave")}`
       );
       if (userChoice) {
         this.loadAutoSave();
@@ -656,13 +660,13 @@ class PlayScene extends Phaser.Scene {
           }
         });
     } else {
-      alert("No more actions to undo!");
+      alert(`${this.localLang.getTranslation("alerts.undo")}`);
     }
   }
 
   redo() {
     if (this.redoStack.length === 0) {
-      alert("No actions to redo!");
+      alert(`${this.localLang.getTranslation(`alerts.redo`)}`);
       return;
     }
 

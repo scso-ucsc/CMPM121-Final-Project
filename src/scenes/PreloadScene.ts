@@ -1,10 +1,53 @@
 import Phaser from 'phaser';
-class PreloadScene extends Phaser.Scene {
+
+export class LocalizationManager {
+  private translations: Record<string, string> = {};
+  private currentLanguage: string = "en";
+
+  async loadLanguage(language: string): Promise<void> {
+    const path = `assets/localization/${language}.json`;
+    const response = await fetch(path);
+
+    if (!response.ok) {
+      console.error(`Failed to load language file for ${language}`);
+      return;
+    }
+
+    this.translations = await response.json();
+    this.currentLanguage = language;
+  }
+
+  getTranslation(key: string): string {
+    const keys = key.split('.'); // Split the key by dots, e.g., "ui.day" -> ["ui", "day"]
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let result: any = this.translations;
+
+    for (const k of keys) {
+        result = result?.[k]; // Dynamically traverse the object
+        if (result === undefined) {
+            console.log("result undefined")
+            return key; // Fallback to key if translation is missing
+        }
+    }
+
+    return result;
+}
+
+  getCurrentLanguage(): string {
+    return this.currentLanguage;
+  }
+};
+
+export const localLang: LocalizationManager = new LocalizationManager;
+export class PreloadScene extends Phaser.Scene {
+
   constructor() {
     super("PreloadScene");
   }
 
   preload() {
+    localLang.loadLanguage("en");
+    getUserChoice();
     this.load.image("dirtTile", "assets/dirttile.png");
     this.load.tilemapTiledJSON("map", "assets/grassymap.json");
     this.load.image("tileset-1", "assets/grasstiles.png");
@@ -209,10 +252,28 @@ class PreloadScene extends Phaser.Scene {
     const info = document.getElementById("info")
     if(info){
       info.innerHTML =
-      "<strong>CONTROLS:</strong> ARROWS - Move | X - Reap Cell | C - Sow Cell | SPACE - Advance Time | Q - Choose Grass | W - Choose Flower | E - Choose Shrub | Z - Undo | Y - Redo";
+      localLang.getTranslation("controls");
     }
     //Start Game
     this.scene.start("PlayScene");
   }
 }
-export default PreloadScene;
+
+function getUserChoice() {
+  const message = "Select Language | 言語を選択してください | حدد اللغة \n1 - English\n2 - 日本語\n3 - عربي";
+  const userInput = window.prompt(message);
+
+  switch (userInput) {
+    case "1":
+      localLang.loadLanguage("en");
+      break;
+    case "2":
+      localLang.loadLanguage("ja");
+      break;
+    case "3":
+      localLang.loadLanguage("ar");
+      break;
+    default:
+      alert("Invalid selection. Please try again.");
+  }
+}

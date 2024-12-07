@@ -17,6 +17,9 @@
         "water": "水レベル: ",
         "seed": "種の選択: ",
         "save_slot": "セーブスロット ",
-        "load_slot": "ロードスロット "
+        "load_slot": "ロードスロット ",
+        "grass": "草",
+        "flower": "花",
+        "shrub": "低木"
     }
 }

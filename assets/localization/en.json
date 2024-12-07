@@ -17,6 +17,9 @@
         "water": "Water Level: ",
         "seed": "Seed Choice: ",
         "save_slot": "Save Slot ",
-        "load_slot": "Load Slot "
+        "load_slot": "Load Slot ",
+        "grass": "Grass",
+        "flower": "Flower",
+        "shrub": "Shrub"
     }
 }
