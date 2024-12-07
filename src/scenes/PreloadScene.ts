@@ -1,4 +1,4 @@
-import Phaser from 'phaser';
+import Phaser from "phaser";
 
 export class LocalizationManager {
   private translations: Record<string, string> = {};
@@ -18,29 +18,28 @@ export class LocalizationManager {
   }
 
   getTranslation(key: string): string {
-    const keys = key.split('.'); // Split the key by dots, e.g., "ui.day" -> ["ui", "day"]
+    const keys = key.split("."); // Split the key by dots, e.g., "ui.day" -> ["ui", "day"]
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let result: any = this.translations;
 
     for (const k of keys) {
-        result = result?.[k]; // Dynamically traverse the object
-        if (result === undefined) {
-            console.log("result undefined")
-            return key; // Fallback to key if translation is missing
-        }
+      result = result?.[k]; // Dynamically traverse the object
+      if (result === undefined) {
+        console.log("result undefined");
+        return key; // Fallback to key if translation is missing
+      }
     }
 
     return result;
-}
+  }
 
   getCurrentLanguage(): string {
     return this.currentLanguage;
   }
-};
+}
 
-export const localLang: LocalizationManager = new LocalizationManager;
+export const localLang: LocalizationManager = new LocalizationManager();
 export class PreloadScene extends Phaser.Scene {
-
   constructor() {
     super("PreloadScene");
   }
@@ -249,10 +248,9 @@ export class PreloadScene extends Phaser.Scene {
     this.createPlantAnimations();
 
     //Controls Text
-    const info = document.getElementById("info")
-    if(info){
-      info.innerHTML =
-      localLang.getTranslation("controls");
+    const info = document.getElementById("info");
+    if (info) {
+      info.innerHTML = localLang.getTranslation("controls");
     }
     //Start Game
     this.scene.start("PlayScene");
@@ -260,7 +258,8 @@ export class PreloadScene extends Phaser.Scene {
 }
 
 function getUserChoice() {
-  const message = "Select Language | 言語を選択してください | حدد اللغة \n1 - English\n2 - 日本語\n3 - عربي";
+  const message =
+    "Select Language | 言語を選択してください | حدد اللغة \n1 - English\n2 - 日本語\n3 - عربي";
   const userInput = window.prompt(message);
 
   switch (userInput) {
@@ -277,3 +276,5 @@ function getUserChoice() {
       alert("Invalid selection. Please try again.");
   }
 }
+
+export default PreloadScene;
