@@ -15,7 +15,6 @@
     </style>
     <script src="./lib/phaser.js"></script>
     <script type="module" src="./lib/StateMachine.js"></script>
-
     <script type="module" src="./src/scenes/PreloadScene.ts"></script>
     <script type="module" src="./src/scenes/PlayScene.ts"></script>
     <script type="module" src="./src/prefabs/Cell.ts"></script>
@@ -23,6 +22,18 @@
     <script type="module" src="./src/utils/PlantDefinitions.js"></script>
     <script type="module" src="./src/utils/ScenarioParser.ts"></script>
     <script type="module" src="./src/main.ts"></script>
+    <script>
+      if("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+          navigator.serviceWorker.register("./service-worker.js")
+          .then((registration) => {
+            console.log("Service Worker registered with scope: ", registration.scope);
+          }).catch((err) => {
+            console.log("Service Worker registration failed: ", err);
+          });
+        });
+      }
+    </script>
   </head>
   <body>
     <div id="phaser-game"></div>
