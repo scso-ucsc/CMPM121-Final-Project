@@ -401,10 +401,10 @@ class PlayScene extends Phaser.Scene {
       .image(50, 200, "advancebutton")
       .setInteractive();
 
-    this.upButton = this.add.image(425, 200, "upbutton").setInteractive();
-    this.downButton = this.add.image(425, 250, "downbutton").setInteractive();
-    this.leftButton = this.add.image(425, 300, "leftbutton").setInteractive();
-    this.rightButton = this.add.image(425, 350, "rightbutton").setInteractive();
+    this.upButton = this.add.image(230, 400, "upbutton").setInteractive();
+    this.downButton = this.add.image(230, 435, "downbutton").setInteractive();
+    this.leftButton = this.add.image(195, 435, "leftbutton").setInteractive();
+    this.rightButton = this.add.image(265, 435, "rightbutton").setInteractive();
 
     this.reapButton.on("pointerdown", () => {
       const nearestCell = this.findNearestCell();
@@ -436,27 +436,52 @@ class PlayScene extends Phaser.Scene {
     const moveState = new MoveState();
 
     this.upButton.on("pointerdown", () => {
-      console.log("Moving up.");
       moveState.execute(this, this.player);
-      this.input.keyboard.emit("keydown-UP");
+      this.player.setVelocityY(-this.player.speed);
+      this.player.direction = "up";
+      this.player.anims.play("walk-up", true);
     });
 
     this.downButton.on("pointerdown", () => {
-      console.log("Moving down.");
       moveState.execute(this, this.player);
-      this.input.keyboard.emit("keydown-DOWN");
+      this.player.setVelocityY(this.player.speed);
+      this.player.direction = "down";
+      this.player.anims.play("walk-down", true);
     });
 
     this.leftButton.on("pointerdown", () => {
-      console.log("Moving left.");
       moveState.execute(this, this.player);
-      this.input.keyboard.emit("keydown-LEFT");
+      this.player.setVelocityX(-this.player.speed);
+      this.player.direction = "left";
+      this.player.anims.play("walk-left", true);
     });
 
     this.rightButton.on("pointerdown", () => {
-      console.log("Moving right.");
       moveState.execute(this, this.player);
-      this.input.keyboard.emit("keydown-RIGHT");
+      this.player.setVelocityX(this.player.speed);
+      this.player.direction = "right";
+      this.player.anims.play("walk-right", true);
+    });
+
+    // Add pointerup events to stop movement
+    this.upButton.on("pointerup", () => {
+      this.player.setVelocityY(0);
+      this.player.anims.play("idle"); 
+    });
+
+    this.downButton.on("pointerup", () => {
+      this.player.setVelocityY(0);
+      this.player.anims.play("idle"); 
+    });
+
+    this.leftButton.on("pointerup", () => {
+      this.player.setVelocityX(0);
+      this.player.anims.play("idle"); 
+    });
+
+    this.rightButton.on("pointerup", () => {
+      this.player.setVelocityX(0);
+      this.player.anims.play("idle"); 
     });
   }
 
