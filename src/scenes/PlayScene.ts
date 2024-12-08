@@ -371,6 +371,23 @@ class PlayScene extends Phaser.Scene {
   }
 
   createSideButtons() {
+    const grassButton = this.add.image(50, 200, "grassbutton").setInteractive();
+    grassButton.on("pointerdown", () => {
+      this.updateSeedChoice("grass");
+    });
+
+    const flowerButton = this.add
+      .image(50, 250, "flowerbutton")
+      .setInteractive();
+    flowerButton.on("pointerdown", () => {
+      this.updateSeedChoice("flower");
+    });
+
+    const shrubButton = this.add.image(50, 300, "shrubbutton").setInteractive();
+    shrubButton.on("pointerdown", () => {
+      this.updateSeedChoice("shrub");
+    });
+
     this.reapButton = this.add.image(50, 100, "reapbutton").setInteractive();
 
     this.sowButton = this.add.image(50, 150, "sowbutton").setInteractive();
