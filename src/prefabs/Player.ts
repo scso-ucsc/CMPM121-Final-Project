@@ -124,7 +124,7 @@ class IdleState extends State {
   }
 }
 
-class MoveState extends State {
+export class MoveState extends State {
   execute(scene: Phaser.Scene, player: Player): void {
     if (scene.input.keyboard && this.stateMachine) {
       const { left, right, up, down } = scene.input.keyboard.createCursorKeys();
