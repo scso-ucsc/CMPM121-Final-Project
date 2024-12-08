@@ -70,6 +70,10 @@ class PlayScene extends Phaser.Scene {
   loadButton2: Phaser.GameObjects.Text | null = null;
   loadButton3: Phaser.GameObjects.Text | null = null;
 
+  // side buttons
+  reapButton: Phaser.GameObjects.Image | null = null;
+  sowButton: Phaser.GameObjects.Image | null = null;
+
   //player variables
   playerSowTargetBox: Phaser.GameObjects.Sprite | null = null;
   playerReapTargetBox: Phaser.GameObjects.Sprite | null = null;
@@ -101,33 +105,35 @@ class PlayScene extends Phaser.Scene {
     this.createPlayer();
 
     //Loading External DSL and applying data
-    this.loadScenario(`assets/scenarios/defaultScenario${this.localLang.getCurrentLanguage().toUpperCase()}.txt`).then(
-      (scenario) => {
-        this.day = scenario.StartingConditions.Day as number;
-        this.sunLevel = scenario.StartingConditions.SunLevel as number;
-        this.waterLevel = scenario.StartingConditions.WaterLevel as number;
-        this.playerSeedChoice = scenario.StartingConditions.PlayerSeedChoice as
-          | "grass"
-          | "shrub"
-          | "flower";
+    this.loadScenario(
+      `assets/scenarios/defaultScenario${this.localLang
+        .getCurrentLanguage()
+        .toUpperCase()}.txt`
+    ).then((scenario) => {
+      this.day = scenario.StartingConditions.Day as number;
+      this.sunLevel = scenario.StartingConditions.SunLevel as number;
+      this.waterLevel = scenario.StartingConditions.WaterLevel as number;
+      this.playerSeedChoice = scenario.StartingConditions.PlayerSeedChoice as
+        | "grass"
+        | "shrub"
+        | "flower";
 
-        this.victoryConditions = scenario.VictoryConditions as NonEventSection;
-        this.weatherPolicy = scenario.WeatherPolicy as NonEventSection;
-        this.eventsQueue = Object.entries(scenario.Events)
-          .map(([day, event]) => {
-            return { day: parseInt(day), ...event };
-          })
-          .sort((a: { day: number }, b: { day: number }) => a.day - b.day);
+      this.victoryConditions = scenario.VictoryConditions as NonEventSection;
+      this.weatherPolicy = scenario.WeatherPolicy as NonEventSection;
+      this.eventsQueue = Object.entries(scenario.Events)
+        .map(([day, event]) => {
+          return { day: parseInt(day), ...event };
+        })
+        .sort((a: { day: number }, b: { day: number }) => a.day - b.day);
 
-        this.createGrid();
-        this.createInteractions();
-        this.updateGrid();
-        this.updateUI();
-
-        this.createSaveLoadUI();
-        this.autoSaveInitilizer();
-      }
-    );
+      this.createGrid();
+      this.createInteractions();
+      this.updateGrid();
+      this.updateUI();
+      this.createSideButtons();
+      this.createSaveLoadUI();
+      this.autoSaveInitilizer();
+    });
   }
 
   update() {
@@ -206,6 +212,41 @@ class PlayScene extends Phaser.Scene {
     }
   }
 
+  findNearestCell(): Cell | null {
+    //if (!this.cellGrid || !this.player) return null;
+
+    const playerX = this.player.x;
+    const playerY = this.player.y;
+
+    let closestCell: Cell | null = null;
+    let minDistance = Infinity;
+
+    this.cellGrid.forEach((row) => {
+      row.forEach((cell) => {
+        const distance = Phaser.Math.Distance.Between(
+          playerX,
+          playerY,
+          cell.x,
+          cell.y
+        );
+        if (distance < minDistance) {
+          minDistance = distance;
+          closestCell = cell;
+        }
+      });
+    });
+
+    if (closestCell) {
+      console.log(
+        `Nearest cell found at (${closestCell.row}, ${closestCell.col})`
+      );
+    } else {
+      console.log("No cell found within range.");
+    }
+
+    return closestCell;
+  }
+
   //helper functions to access byte array
   getCellIndex(row: number, col: number) {
     return (row * this.gridWidth + col) * this.bytesPerCell;
@@ -241,16 +282,21 @@ class PlayScene extends Phaser.Scene {
     this.cellGroup = this.add.group({
       classType: Cell,
     });
+
+    // init cellGrid
+    this.cellGrid = [];
     this.gridWidth = 15;
     this.gridHeight = 15;
     //For each cell: plantType, waterLevel, growthLevel
     this.bytesPerCell = 3;
 
     const totalCells = this.gridWidth * this.gridHeight;
-    //byte array
+
     this.gridState = new Uint8Array(totalCells * this.bytesPerCell);
 
     for (let row = 0; row < this.gridHeight; row++) {
+      const rowArray: Cell[] = [];
+
       for (let col = 0; col < this.gridWidth; col++) {
         //init the byte array and make them start with nothing
         const index = this.getCellIndex(row, col);
@@ -261,8 +307,13 @@ class PlayScene extends Phaser.Scene {
         //now create Cell prefab
         const x = col * cellSize + cellSize / 2;
         const y = row * cellSize + cellSize / 2;
-        this.cellGroup.add(new Cell(this, x, y, "dirtTile", row, col));
+        const cell = new Cell(this, x, y, "dirtTile", row, col);
+
+        this.cellGroup.add(cell);
+        rowArray.push(cell);
       }
+
+      this.cellGrid.push(rowArray);
     }
   }
 
@@ -310,11 +361,41 @@ class PlayScene extends Phaser.Scene {
       .text(
         (gamewidth as number) / 2,
         ((gameheight as number) / 10) * 2.5,
-        `${this.localLang.getTranslation("ui.seed")}${this.localLang.getTranslation("ui." + this.playerSeedChoice)}`,
+        `${this.localLang.getTranslation(
+          "ui.seed"
+        )}${this.localLang.getTranslation("ui." + this.playerSeedChoice)}`,
         { fontSize: "18px", color: "#ffffff" }
       )
       .setOrigin(0.5, 0.5);
     this.seedChoiceText.setDepth(this.textdepth);
+  }
+
+  createSideButtons() {
+    this.reapButton = this.add.image(50, 100, "reapbutton").setInteractive();
+
+    this.sowButton = this.add.image(50, 150, "sowbutton").setInteractive();
+
+    this.reapButton.on("pointerdown", () => {
+      const nearestCell = this.findNearestCell();
+      if (nearestCell) {
+        nearestCell.reapCell();
+        console.log(`Reaped cell at (${nearestCell.row}, ${nearestCell.col})`);
+      } else {
+        console.log("No nearest cell found to reap.");
+      }
+    });
+
+    this.sowButton.on("pointerdown", () => {
+      const nearestCell = this.findNearestCell();
+      if (nearestCell) {
+        nearestCell.sowCell(this.playerSeedChoice);
+        console.log(
+          `Sowed cell at (${nearestCell.row}, ${nearestCell.col}) with ${this.playerSeedChoice}`
+        );
+      } else {
+        console.log("No nearest cell found to sow.");
+      }
+    });
   }
 
   createPlayer() {
@@ -366,9 +447,16 @@ class PlayScene extends Phaser.Scene {
 
   createSaveButton(yOffset: number, slotNumber: number) {
     const saveButton = this.add
-      .text(10, 400 + yOffset, `${this.localLang.getTranslation("ui.save_slot")}${slotNumber.toString()}`, {
-        color: "#ffffff",
-      })
+      .text(
+        10,
+        400 + yOffset,
+        `${this.localLang.getTranslation(
+          "ui.save_slot"
+        )}${slotNumber.toString()}`,
+        {
+          color: "#ffffff",
+        }
+      )
       .setInteractive()
       .on("pointerdown", () => this.saveGame(slotNumber));
     return saveButton;
@@ -376,9 +464,16 @@ class PlayScene extends Phaser.Scene {
 
   createLoadButton(yOffset: number, slotNumber: number) {
     const loadButton = this.add
-      .text(360, 400 + yOffset, `${this.localLang.getTranslation("ui.load_slot")}${slotNumber.toString()}`, {
-        color: "#ffffff",
-      })
+      .text(
+        360,
+        400 + yOffset,
+        `${this.localLang.getTranslation(
+          "ui.load_slot"
+        )}${slotNumber.toString()}`,
+        {
+          color: "#ffffff",
+        }
+      )
       .setInteractive()
       .on("pointerdown", () => this.loadGame(slotNumber));
     return loadButton;
@@ -396,7 +491,9 @@ class PlayScene extends Phaser.Scene {
 
   updateUI() {
     const seedIcon = this.getPlantIcon(this.playerSeedChoice);
-    (this.dayText as Phaser.GameObjects.Text).setText(`${this.localLang.getTranslation("ui.day")}${this.day}`);
+    (this.dayText as Phaser.GameObjects.Text).setText(
+      `${this.localLang.getTranslation("ui.day")}${this.day}`
+    );
     (this.sunLevelText as Phaser.GameObjects.Text).setText(
       `${this.localLang.getTranslation("ui.sun")}${this.sunLevel}`
     );
@@ -404,7 +501,11 @@ class PlayScene extends Phaser.Scene {
       `${this.localLang.getTranslation("ui.water")}${this.waterLevel}`
     );
     (this.seedChoiceText as Phaser.GameObjects.Text).setText(
-      `${this.localLang.getTranslation("ui.seed")}${seedIcon} ${this.localLang.getTranslation("ui." + this.playerSeedChoice)}`
+      `${this.localLang.getTranslation(
+        "ui.seed"
+      )}${seedIcon} ${this.localLang.getTranslation(
+        "ui." + this.playerSeedChoice
+      )}`
     );
   }
 
@@ -413,7 +514,9 @@ class PlayScene extends Phaser.Scene {
 
     const seedIcon = this.getPlantIcon(seedChoice);
     (this.seedChoiceText as Phaser.GameObjects.Text).setText(
-      `${this.localLang.getTranslation("ui.seed")}${seedIcon} ${this.localLang.getTranslation("ui." + seedChoice)}`
+      `${this.localLang.getTranslation(
+        "ui.seed"
+      )}${seedIcon} ${this.localLang.getTranslation("ui." + seedChoice)}`
     );
     this.playerSeedChoice = seedChoice;
   }
@@ -535,6 +638,7 @@ class PlayScene extends Phaser.Scene {
   }
 
   autoSave() {
+    console.log("AutoSave triggered");
     const gameData: gameState = {
       day: this.day,
       sunLevel: this.sunLevel,

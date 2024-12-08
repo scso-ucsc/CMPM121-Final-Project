@@ -57,6 +57,21 @@ class Cell extends Phaser.Physics.Arcade.Sprite {
     }
   }
 
+  static sowSelectedCell(
+    selectedCell: Cell | null,
+    plantType: "grass" | "flower" | "shrub"
+  ) {
+    if (selectedCell) {
+      selectedCell.sowCell(plantType);
+    }
+  }
+
+  static reapSelectedCell(selectedCell: Cell | null) {
+    if (selectedCell) {
+      selectedCell.reapCell();
+    }
+  }
+
   checkNeighborCells(): boolean {
     // Directions for adjacent cells
     const directions = [

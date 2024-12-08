@@ -46,7 +46,7 @@ class ScenarioParser {
   }
 
   parse(): Result {
-    const lines = this.text.split('\n');
+    const lines = this.text.split("\n");
     const result: Result = {}; // Result is now explicitly typed
 
     let currentSection: string | null = null;
@@ -85,9 +85,11 @@ class ScenarioParser {
       }
 
       if (currentSection === "Events" && currentEventDay) {
-        (result[currentSection] as EventsSection)[currentEventDay][key] = this.parseValue(value);
+        (result[currentSection] as EventsSection)[currentEventDay][key] =
+          this.parseValue(value);
       } else {
-        (result[currentSection as string] as NonEventSection)[key] = this.parseValue(value);
+        (result[currentSection as string] as NonEventSection)[key] =
+          this.parseValue(value);
       }
     }
 

@@ -50,6 +50,9 @@ export class PreloadScene extends Phaser.Scene {
     this.load.image("dirtTile", "assets/dirttile.png");
     this.load.tilemapTiledJSON("map", "assets/grassymap.json");
     this.load.image("tileset-1", "assets/grasstiles.png");
+    this.load.image("sowbutton", "assets/sowbutton.png");
+    this.load.image("reapbutton", "assets/reapbutton.png");
+
     this.load.spritesheet("character", "./assets/character.png", {
       frameWidth: 32,
       frameHeight: 32,
