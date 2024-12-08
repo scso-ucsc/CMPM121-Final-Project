@@ -56,6 +56,10 @@ export class PreloadScene extends Phaser.Scene {
     this.load.image("grassbutton", "assets/grassbutton.png");
     this.load.image("flowerbutton", "assets/flowerbutton.png");
     this.load.image("shrubbutton", "assets/shrubbutton.png");
+    this.load.image("upbutton", "assets/upbutton.png");
+    this.load.image("downbutton", "assets/downbutton.png");
+    this.load.image("leftbutton", "assets/leftbutton.png");
+    this.load.image("rightbutton", "assets/rightbutton.png");
 
     this.load.spritesheet("character", "./assets/character.png", {
       frameWidth: 32,

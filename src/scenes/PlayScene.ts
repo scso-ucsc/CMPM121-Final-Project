@@ -5,7 +5,7 @@ import ScenarioParser, {
 } from "../utils/ScenarioParser";
 import { plantDefinitions } from "../utils/PlantDefinitions";
 import Cell from "../prefabs/Cell";
-import { Player, StateMachine } from "../prefabs/Player";
+import { Player, StateMachine, MoveState } from "../prefabs/Player";
 import { LocalizationManager, localLang } from "./PreloadScene";
 
 const gamewidth: number = 480;
@@ -74,6 +74,10 @@ class PlayScene extends Phaser.Scene {
   reapButton: Phaser.GameObjects.Image | null = null;
   sowButton: Phaser.GameObjects.Image | null = null;
   advanceButton: Phaser.GameObjects.Image | null = null;
+  upButton: Phaser.GameObjects.Image | null = null;
+  downButton: Phaser.GameObjects.Image | null = null;
+  leftButton: Phaser.GameObjects.Image | null = null;
+  rightButton: Phaser.GameObjects.Image | null = null;
 
   //player variables
   playerSowTargetBox: Phaser.GameObjects.Sprite | null = null;
@@ -395,6 +399,11 @@ class PlayScene extends Phaser.Scene {
 
     this.advanceButton = this.add.image(50, 200, 'advancebutton').setInteractive();
 
+    this.upButton = this.add.image(50, 400, 'upbutton').setInteractive();
+    this.downButton = this.add.image(50, 450, 'upbutton').setInteractive();
+    this.leftButton = this.add.image(50, 500, 'upbutton').setInteractive();
+    this.rightButton = this.add.image(50, 550, 'upbutton').setInteractive();
+
     this.reapButton.on("pointerdown", () => {
       const nearestCell = this.findNearestCell();
       if (nearestCell) {
@@ -421,6 +430,33 @@ class PlayScene extends Phaser.Scene {
       console.log("Advancing to the next day.");
       this.advanceDay();
   });
+
+  const moveState = new MoveState(); 
+    
+
+    this.upButton.on("pointerdown", () => {
+        console.log("Moving up.");
+        moveState.execute(this, this.player); 
+        this.input.keyboard.emit("keydown-UP"); 
+    });
+
+    this.downButton.on("pointerdown", () => {
+        console.log("Moving down.");
+        moveState.execute(this, this.player); 
+        this.input.keyboard.emit("keydown-DOWN"); 
+    });
+
+    this.leftButton.on("pointerdown", () => {
+        console.log("Moving left.");
+        moveState.execute(this, this.player); 
+        this.input.keyboard.emit("keydown-LEFT"); 
+    });
+
+    this.rightButton.on("pointerdown", () => {
+        console.log("Moving right.");
+        moveState.execute(this, this.player); 
+        this.input.keyboard.emit("keydown-RIGHT");
+    });
   }
 
   createPlayer() {
