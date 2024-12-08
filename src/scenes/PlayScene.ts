@@ -397,12 +397,14 @@ class PlayScene extends Phaser.Scene {
 
     this.sowButton = this.add.image(50, 150, "sowbutton").setInteractive();
 
-    this.advanceButton = this.add.image(50, 200, 'advancebutton').setInteractive();
+    this.advanceButton = this.add
+      .image(50, 200, "advancebutton")
+      .setInteractive();
 
-    this.upButton = this.add.image(50, 400, 'upbutton').setInteractive();
-    this.downButton = this.add.image(50, 450, 'upbutton').setInteractive();
-    this.leftButton = this.add.image(50, 500, 'upbutton').setInteractive();
-    this.rightButton = this.add.image(50, 550, 'upbutton').setInteractive();
+    this.upButton = this.add.image(425, 200, "upbutton").setInteractive();
+    this.downButton = this.add.image(425, 250, "downbutton").setInteractive();
+    this.leftButton = this.add.image(425, 300, "leftbutton").setInteractive();
+    this.rightButton = this.add.image(425, 350, "rightbutton").setInteractive();
 
     this.reapButton.on("pointerdown", () => {
       const nearestCell = this.findNearestCell();
@@ -426,36 +428,35 @@ class PlayScene extends Phaser.Scene {
       }
     });
 
-    this.advanceButton.on('pointerdown', () => {
+    this.advanceButton.on("pointerdown", () => {
       console.log("Advancing to the next day.");
       this.advanceDay();
-  });
+    });
 
-  const moveState = new MoveState(); 
-    
+    const moveState = new MoveState();
 
     this.upButton.on("pointerdown", () => {
-        console.log("Moving up.");
-        moveState.execute(this, this.player); 
-        this.input.keyboard.emit("keydown-UP"); 
+      console.log("Moving up.");
+      moveState.execute(this, this.player);
+      this.input.keyboard.emit("keydown-UP");
     });
 
     this.downButton.on("pointerdown", () => {
-        console.log("Moving down.");
-        moveState.execute(this, this.player); 
-        this.input.keyboard.emit("keydown-DOWN"); 
+      console.log("Moving down.");
+      moveState.execute(this, this.player);
+      this.input.keyboard.emit("keydown-DOWN");
     });
 
     this.leftButton.on("pointerdown", () => {
-        console.log("Moving left.");
-        moveState.execute(this, this.player); 
-        this.input.keyboard.emit("keydown-LEFT"); 
+      console.log("Moving left.");
+      moveState.execute(this, this.player);
+      this.input.keyboard.emit("keydown-LEFT");
     });
 
     this.rightButton.on("pointerdown", () => {
-        console.log("Moving right.");
-        moveState.execute(this, this.player); 
-        this.input.keyboard.emit("keydown-RIGHT");
+      console.log("Moving right.");
+      moveState.execute(this, this.player);
+      this.input.keyboard.emit("keydown-RIGHT");
     });
   }
 
