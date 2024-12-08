@@ -73,6 +73,7 @@ class PlayScene extends Phaser.Scene {
   // side buttons
   reapButton: Phaser.GameObjects.Image | null = null;
   sowButton: Phaser.GameObjects.Image | null = null;
+  advanceButton: Phaser.GameObjects.Image | null = null;
 
   //player variables
   playerSowTargetBox: Phaser.GameObjects.Sprite | null = null;
@@ -371,19 +372,19 @@ class PlayScene extends Phaser.Scene {
   }
 
   createSideButtons() {
-    const grassButton = this.add.image(50, 200, "grassbutton").setInteractive();
+    const grassButton = this.add.image(50, 250, "grassbutton").setInteractive();
     grassButton.on("pointerdown", () => {
       this.updateSeedChoice("grass");
     });
 
     const flowerButton = this.add
-      .image(50, 250, "flowerbutton")
+      .image(50, 300, "flowerbutton")
       .setInteractive();
     flowerButton.on("pointerdown", () => {
       this.updateSeedChoice("flower");
     });
 
-    const shrubButton = this.add.image(50, 300, "shrubbutton").setInteractive();
+    const shrubButton = this.add.image(50, 350, "shrubbutton").setInteractive();
     shrubButton.on("pointerdown", () => {
       this.updateSeedChoice("shrub");
     });
@@ -391,6 +392,8 @@ class PlayScene extends Phaser.Scene {
     this.reapButton = this.add.image(50, 100, "reapbutton").setInteractive();
 
     this.sowButton = this.add.image(50, 150, "sowbutton").setInteractive();
+
+    this.advanceButton = this.add.image(50, 200, 'advancebutton').setInteractive();
 
     this.reapButton.on("pointerdown", () => {
       const nearestCell = this.findNearestCell();
@@ -413,6 +416,11 @@ class PlayScene extends Phaser.Scene {
         console.log("No nearest cell found to sow.");
       }
     });
+
+    this.advanceButton.on('pointerdown', () => {
+      console.log("Advancing to the next day.");
+      this.advanceDay();
+  });
   }
 
   createPlayer() {
