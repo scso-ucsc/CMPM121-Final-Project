@@ -1,26 +1,3 @@
-// //DSL Parser for the scenario file
-// interface scenarioObject {
-//   StartingConditons: conditionsObject,
-//   VictoryConditions: victoryObject,
-//   WeatherPolicy: weatherPolicyObject,
-// }
-
-// interface conditionsObject {
-//   Day: number,
-//   SunLevel: number,
-//   WaterLevel: number,
-//   PlayerSeedChoice: string
-// }
-
-// interface victoryObject {
-//   MaturePlantsRequired: number,
-//   MaximumDays: number,
-// }
-
-// interface weatherPolicyObject {
-//   SunRange: number[],
-//   WaterRange: number[],
-// }
 
 export interface EventDay {
   [key: string]: string | number | number[]; // Event data allows string, number, or arrays
