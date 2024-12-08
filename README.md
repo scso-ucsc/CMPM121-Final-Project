@@ -138,5 +138,17 @@ Our game was localized to support English, Japanese, and Arabic. This was achiev
 In order to make our game installable on mobile devices we referred to Brace for instruction. From there, a manifest.json file containing all of the app data was developed including two new icon assets that would be used as the app's icon. After that, a service worker JavaScript file designed to cache all of the necessary files needed to run the game was made, which includes its own listener functions to add into the generated app. Since this service worker only works with JavaScript files, all of our TypeScript files first needed to be converted into JavaScript files. This process involved ensuring all TypeScript files had no compiling errors and then converting them into JavaScript files through `tsc npx`. This generated a `dist/` folder that contained all of these new JavaScript files. The tsconfig.json file was also updated to allow for this conversion. Afterwards, these aspects were added into our index.html file so that they may be included in the web link. This allowed our game to be downloadable and could run on other devices.
 
 ### Mobile Play (Offline)
+To optimize our game for mobile devices, we designed and implemented touch-friendly buttons for key interactions. These include directional buttons (up, down, left, right) for player movement, seamlessly integrated with the MoveState class to handle velocity, direction, and animations.
+In addition to movement, we added action-specific buttons:
+
+Reap Button: Allows players to clear nearby cells with a simple tap, enhancing gameplay flow.
+
+Sow Button: Plants the currently selected plant type in the nearest cell, making planting intuitive and efficient.
+
+Advance Day Button: Progresses the game to the next day, fitting naturally into the gameplay loop.
+
+We also created buttons for plant selection, enabling players to switch between grass, flowers, and shrubs. This allows players to quickly switch plant types with clear icon-based designs.
+By implementing these touch-friendly controls, we’ve ensured that the game remains accessible, engaging, and easy to play on mobile devices, providing a seamless experience tailored to touchscreen users.
 
 ### Reflection
+With this project now being adjusted to work on mobile, the largest aspect that we need to change was how players could provide inputs. Since mobile devices do not have keyboards, we had to add physical buttons that players can press in order to move around, add plants, and advance the day. Since we didn't want these buttons to feature text as it would require additional implementations due to the addition of localization to this project, we made sure that the icons for these buttons used symbols that would provide players an idea of what they did. The UI also updates accordingly for whenever they press on those buttons. As per usual, our roles have mostly remained the same with each of us assisting in another whenever we can. The transition to using TypeScript instead of JavaScript for this project had definitely left an impact on how we viewed both the engine and the language. Whilst TypeScript is more secure and has added features, it was ultimately less accepted by web browsers which required more effort to figure out. This has left a major impression on how we view both languages and how we can use them to produce games in the future.
