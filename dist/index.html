@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CMPM121 - Team 3 - Final Project</title>
+    <link rel="manifest" href="/assets/manifest-DsLiHyP3.json" />
+    <style>
+      body {
+        background-color: beige;
+      }
+      canvas {
+        border: blue;
+      }
+    </style>
+    <script src="./lib/phaser.js"></script>
+    <script>
+      if("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+          navigator.serviceWorker.register("./service-worker.js")
+          .then((registration) => {
+            console.log("Service Worker registered with scope: ", registration.scope);
+          }).catch((err) => {
+            console.log("Service Worker registration failed: ", err);
+          });
+        });
+      }
+    </script>
+    <script type="module" crossorigin src="/assets/index-BCJSWicI.js"></script>
+  </head>
+  <body>
+    <div id="phaser-game"></div>
+    <div id="info"></div>
+  </body>
+</html>
