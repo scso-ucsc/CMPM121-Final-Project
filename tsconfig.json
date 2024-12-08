@@ -114,6 +114,6 @@
     "assets",
     "lib",
     "def",
-    "/src/prefabs/Cell.ts"
+    //"/src/prefabs/Cell.ts"
   ]
 }
