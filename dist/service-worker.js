@@ -4,7 +4,7 @@ const urlsToCache = [
     "index.html",
     "assets/index-1Ad0PHsT.js",
     "assets/index-BCJSWicI.js",
-    "assets/manifest-DyTKDE9T.json",
+    "manifest-DyTKDE9T.json",
     "assets/icons/icon-192x192.png",
     "assets/icons/icon-512x512.png",
     "assets/localization/en.json",
