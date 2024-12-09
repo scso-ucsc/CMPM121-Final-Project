@@ -2,6 +2,10 @@ const CACHE_NAME = "final-game-cache-v1";
 const urlsToCache = [
     "/",
     "index.html",
+    "/dist/index.html",
+    "/dist/assets/index-1Ad0PHsT.js",
+    "/dist/assets/index-BCJSWicI.js",
+    "/dist/assets/manifest-Cwxa1QtS.js",
     "dist/assets/icons/icon-192x192.png",
     "dist/assets/icons/icon-512x512.png",
     "dist/assets/localization/en.json",
