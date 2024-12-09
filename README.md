@@ -126,19 +126,19 @@ With the addition of our External and Internal DSLs, the way in which we impleme
 
 ### How we satisfied the software requirements
 
-### F0+F1+F2
+#### F0+F1+F2
 No major changes were made in order to implement the aforementioned requirements.
 
-### Internationalization
+#### Internationalization
 The internationalization is handled by a translation manager class, which can load different languages based on what the user selects when initally prompted. Then, whenever text is going to be displayed on screen, rather than hard coding it, it calls the texts key from the translation manager, which loads the correct language. The language stored in the translation manager also determines which language of scenario file is loaded, ensuring that that text is also translated. Thus, every piece of text on the screen is able to be translated, as long as that language has been implemented in the localization.
 
-### Localization
+#### Localization
 Our game was localized to support English, Japanese, and Arabic. This was achieved by setting up three separate JSON files that contain dictionaries. Each key in the dictionary is identical, with their value being the translation in the files' respective language. The way the translations were made were via Brace. Brace was simply prompted to translate the English localization JSON. This approach was also implemented for our scenarios. The scenarios are stored in a separate text file from where the rest of the UI is stored (our Play scene file). Copies were made of the scenario file for each language that our localization supports. This ensured that every bit of text in our game was able to be translated into three different languages.
 
-### Mobile Installation
+#### Mobile Installation
 In order to make our game installable on mobile devices we referred to Brace for instruction. From there, a manifest.json file containing all of the app data was developed including two new icon assets that would be used as the app's icon. After that, a service worker JavaScript file designed to cache all of the necessary files needed to run the game was made, which includes its own listener functions to add into the generated app. Since this service worker only works with JavaScript files, all of our TypeScript files first needed to be converted into JavaScript files. This process involved ensuring all TypeScript files had no compiling errors and then converting them into JavaScript files through `tsc npx`. This generated a `dist/` folder that contained all of these new JavaScript files. The tsconfig.json file was also updated to allow for this conversion. Afterwards, these aspects were added into our index.html file so that they may be included in the web link. This allowed our game to be downloadable and could run on other devices.
 
-### Mobile Play (Offline)
+#### Mobile Play (Offline)
 To optimize our game for mobile devices, we designed and implemented touch-friendly buttons for key interactions. These include directional buttons (up, down, left, right) for player movement, seamlessly integrated with the MoveState class to handle velocity, direction, and animations.
 In addition to movement, we added action-specific buttons:
 
