@@ -7,25 +7,25 @@
     "theme_color": "#ffffff",
     "icons": [
       {
-        "src": "icons/icon-192x192.png",
+        "src": "dist/assets/icons/icon-192x192.png",
         "sizes": "192x192",
         "type": "image/png"
       },
       {
-        "src": "icons/icon-512x512.png",
+        "src": "dist/assets/icons/icon-512x512.png",
         "sizes": "512x512",
         "type": "image/png"
       }
     ],
     "screenshots": [
       {
-        "src": "icons/icon-512x512.png",
+        "src": "dist/assets/icons/icon-512x512.png",
         "sizes": "512x512",
         "type": "image/png",
         "form_factor": "wide"
       },
       {
-        "src": "icons/icon-512x512.png",
+        "src": "dist/assets/icons/icon-512x512.png",
         "sizes": "512x512",
         "type": "image/png"
       }
