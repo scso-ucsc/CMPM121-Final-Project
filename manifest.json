@@ -1,7 +1,7 @@
 {
     "name": "CMPM 121 - Final Game Team 3",
     "short_name": "Final Game T3",
-    "start_url": "./dist/index.html",
+    "start_url": "./index.html",
     "display": "standalone",
     "background_color": "#000000",
     "theme_color": "#ffffff",
