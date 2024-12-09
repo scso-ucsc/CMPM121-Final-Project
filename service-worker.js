@@ -5,7 +5,7 @@ const urlsToCache = [
     "dist/index.html",
     "dist/assets/index-1Ad0PHsT.js",
     "dist/assets/index-BCJSWicI.js",
-    "dist/assets/manifest-Cwxa1QtS.json",
+    "dist/assets/manifest-DyTKDE9T.json",
     "dist/assets/icons/icon-192x192.png",
     "dist/assets/icons/icon-512x512.png",
     "dist/service-worker.js",
