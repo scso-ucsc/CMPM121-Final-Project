@@ -8,6 +8,7 @@ const urlsToCache = [
     "dist/assets/manifest-Cwxa1QtS.json",
     "dist/assets/icons/icon-192x192.png",
     "dist/assets/icons/icon-512x512.png",
+    "dist/service-worker.js",
     "dist/assets/localization/en.json",
     "dist/assets/localization/ar.json",
     "dist/assets/localization/ja.json",
